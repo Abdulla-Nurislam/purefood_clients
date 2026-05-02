@@ -1,11 +1,10 @@
 import { useApp } from '../context/AppContext';
-import { products } from '../data/mock-data';
 import { ArrowLeft, Heart, Star, ShieldCheck } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 export function FavoritesScreen() {
-  const { goBack, favorites, toggleFavorite, navigate } = useApp();
-  const favoriteProducts = products.filter(p => favorites.includes(p.id));
+  const { goBack, favorites, toggleFavorite, navigate, allProducts } = useApp();
+  const favoriteProducts = allProducts.filter(p => favorites.includes(p.id));
 
   return (
     <div className="px-4 pt-6 pb-6 space-y-4">

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { products, catalogCategories, smartFilters } from '../data/mock-data';
+import { catalogCategories, smartFilters } from '../data/mock-data';
 import { Search, ShieldCheck, Star, Heart, ChevronLeft, SlidersHorizontal, X } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -30,7 +30,7 @@ function BadgeChip({ badge }: { badge: string }) {
 }
 
 export function CatalogScreen() {
-  const { navigate, isFavorite, toggleFavorite } = useApp();
+  const { navigate, isFavorite, toggleFavorite, allProducts } = useApp();
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [activeSmartFilters, setActiveSmartFilters] = useState<string[]>([]);
@@ -45,7 +45,7 @@ export function CatalogScreen() {
 
   const activeCatData = selectedCat ? catalogCategories.find(c => c.id === selectedCat) : null;
 
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = allProducts.filter(p => {
     if (query && !p.name.toLowerCase().includes(query.toLowerCase()) && !p.supplier.toLowerCase().includes(query.toLowerCase())) return false;
     if (activeCatData) {
       const tagMatch = activeCatData.tagFilter ? p.tags.includes(activeCatData.tagFilter) : true;
@@ -168,7 +168,7 @@ export function CatalogScreen() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm leading-tight">{cat.name}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {products.filter(p => cat.tagFilter ? p.tags.includes(cat.tagFilter) : cat.catFilter ? p.category === cat.catFilter : true).length} товаров
+                      {allProducts.filter(p => cat.tagFilter ? p.tags.includes(cat.tagFilter) : cat.catFilter ? p.category === cat.catFilter : true).length} товаров
                     </p>
                   </div>
                 </button>
@@ -179,7 +179,7 @@ export function CatalogScreen() {
             <div className="mt-6">
               <h3 className="mb-3">Все товары</h3>
               <div className="grid grid-cols-2 gap-3">
-                {products.map(product => (
+                {allProducts.map(product => (
                   <ProductCardCatalog
                     key={product.id}
                     product={product}

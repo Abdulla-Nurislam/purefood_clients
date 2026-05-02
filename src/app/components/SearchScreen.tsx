@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { products, categories, preferences } from '../data/mock-data';
+import { categories, preferences } from '../data/mock-data';
 import { Search, SlidersHorizontal, X, ShieldCheck, Star, ChevronLeft, Heart } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -21,7 +21,7 @@ const badgeColors: Record<string, { bg: string; text: string }> = {
 };
 
 export function SearchScreen() {
-  const { navigate, goBack, isFavorite, toggleFavorite } = useApp();
+  const { navigate, goBack, isFavorite, toggleFavorite, allProducts } = useApp();
   const [query, setQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -30,7 +30,7 @@ export function SearchScreen() {
   const [selectedOrigin, setSelectedOrigin] = useState('');
   const [onlyVerified, setOnlyVerified] = useState(false);
 
-  const filtered = products.filter(p => {
+  const filtered = allProducts.filter(p => {
     if (query && !p.name.toLowerCase().includes(query.toLowerCase()) && !p.supplier.toLowerCase().includes(query.toLowerCase())) return false;
     if (selectedCategory && p.category !== selectedCategory) return false;
     if (selectedTags.length && !selectedTags.some(t => p.tags.includes(t))) return false;

@@ -1,5 +1,5 @@
 import { useApp } from '../context/AppContext';
-import { products, catalogCategories, mockSellers, Product } from '../data/mock-data';
+import { catalogCategories, Product } from '../data/mock-data';
 import { ShieldCheck, Star, MapPin, Bell, Gift, Heart, Search, ChevronRight, Award } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -112,9 +112,9 @@ function ProductCard({ product, onClick, onFavorite, isFav }: {
 }
 
 export function HomeScreen() {
-  const { userName, city, navigate, unreadCount, loyaltyPoints, isFavorite, toggleFavorite, selectedPreferences } = useApp();
+  const { userName, city, navigate, unreadCount, loyaltyPoints, isFavorite, toggleFavorite, selectedPreferences, allProducts, allSellers } = useApp();
 
-  const recommended = products.filter(p =>
+  const recommended = allProducts.filter(p =>
     selectedPreferences.length === 0 || p.tags.some(t => selectedPreferences.includes(t))
   ).slice(0, 6);
 
@@ -227,7 +227,7 @@ export function HomeScreen() {
             </button>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4">
-            {mockSellers.filter(s => s.verified).slice(0, 4).map(seller => (
+            {allSellers.filter(s => s.verified).slice(0, 4).map(seller => (
               <button
                 key={seller.id}
                 onClick={() => navigate(`/seller/${seller.id}`)}

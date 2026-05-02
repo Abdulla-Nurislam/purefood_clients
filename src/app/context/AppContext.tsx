@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { CartItem, Product, Order, Review, Subscription, Notification, mockOrders, mockReviews, mockSubscriptions, mockNotifications } from '../data/mock-data';
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { CartItem, Product, Seller, Order, Review, Subscription, Notification, products as mockProducts, mockSellers as mockSellersData, mockOrders, mockReviews, mockSubscriptions, mockNotifications } from '../data/mock-data';
+import { fetchProducts, fetchSellers } from '../../lib/api';
 
 interface AppState {
   // Auth & onboarding
@@ -59,6 +60,11 @@ interface AppState {
   loyaltyPoints: number;
   addLoyaltyPoints: (pts: number) => void;
 
+  // Live data from Supabase
+  allProducts: Product[];
+  allSellers: Seller[];
+  isLoadingData: boolean;
+
   // Navigation
   currentRoute: string;
   routeParams: Record<string, string>;
@@ -84,7 +90,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>(mockSubscriptions);
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
   const [loyaltyPoints, setLoyaltyPoints] = useState(850);
+  const [allProducts, setAllProducts] = useState<Product[]>(mockProducts);
+  const [allSellers, setAllSellers] = useState<Seller[]>(mockSellersData);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [routeHistory, setRouteHistory] = useState<string[]>(['/home']);
+
+  // Load real data from Supabase on mount
+  useEffect(() => {
+    let mounted = true;
+    async function loadData() {
+      try {
+        const [prods, sels] = await Promise.all([fetchProducts(), fetchSellers()]);
+        if (mounted) {
+          if (prods.length > 0) setAllProducts(prods);
+          if (sels.length > 0) setAllSellers(sels);
+        }
+      } catch (err) {
+        console.error('Failed to load data from Supabase, using mock data:', err);
+      } finally {
+        if (mounted) setIsLoadingData(false);
+      }
+    }
+    loadData();
+    return () => { mounted = false; };
+  }, []);
 
   const currentFullRoute = routeHistory[routeHistory.length - 1] || '/home';
 
@@ -171,6 +200,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       subscriptions, addSubscription, toggleSubscription, removeSubscription,
       notifications, markNotificationRead, markAllNotificationsRead, unreadCount,
       loyaltyPoints, addLoyaltyPoints,
+      allProducts, allSellers, isLoadingData,
       currentRoute, routeParams, navigate, goBack,
     }}>
       {children}

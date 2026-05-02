@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { mockSellers, products, Product } from '../data/mock-data';
+import { Product } from '../data/mock-data';
 import { ChevronLeft, Share2, ShieldCheck, Star, MapPin, Package, ShoppingCart, Heart, Check } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -111,11 +111,11 @@ function SellerProductCard({ product }: { product: Product }) {
 }
 
 export function SellerProfileScreen() {
-  const { goBack, routeParams } = useApp();
+  const { goBack, routeParams, allSellers, allProducts } = useApp();
   const sellerId = routeParams.id;
 
-  const seller = mockSellers.find(s => s.id === sellerId);
-  const sellerProducts = products.filter(p => p.supplierId === sellerId);
+  const seller = allSellers.find(s => s.id === sellerId);
+  const sellerProducts = allProducts.filter(p => p.supplierId === sellerId);
 
   if (!seller) {
     return (

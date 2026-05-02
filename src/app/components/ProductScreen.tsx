@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { products } from '../data/mock-data';
 import { useApp } from '../context/AppContext';
 import { ArrowLeft, ShieldCheck, Star, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, XCircle, Share2, Heart, Plus, Minus, Lock, RefreshCw } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useToast } from './SimpleToast';
 
 export function ProductScreen() {
-  const { addToCart, cart, updateQuantity, routeParams, goBack, navigate, isFavorite, toggleFavorite, subscriptions, addSubscription } = useApp();
+  const { addToCart, cart, updateQuantity, routeParams, goBack, navigate, isFavorite, toggleFavorite, subscriptions, addSubscription, allProducts } = useApp();
   const id = routeParams.id;
   const toast = useToast();
-  const product = products.find(p => p.id === id);
+  const product = allProducts.find(p => p.id === id);
 
   // Validation steps: composition → certificates → lab tests
   const [compositionViewed, setCompositionViewed] = useState(false);

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { mockSellers } from '../data/mock-data';
 import { Search, ShieldCheck, Star, MapPin, Package, ChevronRight, Filter } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -17,12 +16,12 @@ const badgeColors: Record<string, { bg: string; text: string }> = {
 };
 
 export function SellersScreen() {
-  const { navigate } = useApp();
+  const { navigate, allSellers } = useApp();
   const [query, setQuery] = useState('');
   const [onlyVerified, setOnlyVerified] = useState(false);
   const [sortBy, setSortBy] = useState<'rating' | 'products'>('rating');
 
-  const filtered = mockSellers
+  const filtered = allSellers
     .filter(s => {
       if (onlyVerified && !s.verified) return false;
       if (query && !s.name.toLowerCase().includes(query.toLowerCase()) && !s.location.toLowerCase().includes(query.toLowerCase())) return false;
@@ -87,15 +86,15 @@ export function SellersScreen() {
         {/* Stats row */}
         <div className="flex gap-2">
           <div className="flex-1 bg-secondary rounded-xl p-3 text-center">
-            <p className="text-lg text-primary">{mockSellers.filter(s => s.verified).length}</p>
+            <p className="text-lg text-primary">{allSellers.filter(s => s.verified).length}</p>
             <p className="text-xs text-muted-foreground">Верифицировано</p>
           </div>
           <div className="flex-1 bg-secondary rounded-xl p-3 text-center">
-            <p className="text-lg text-primary">{mockSellers.length}</p>
+            <p className="text-lg text-primary">{allSellers.length}</p>
             <p className="text-xs text-muted-foreground">Всего продавцов</p>
           </div>
           <div className="flex-1 bg-secondary rounded-xl p-3 text-center">
-            <p className="text-lg text-primary">{mockSellers.reduce((s, sel) => s + sel.productCount, 0)}</p>
+            <p className="text-lg text-primary">{allSellers.reduce((s, sel) => s + sel.productCount, 0)}</p>
             <p className="text-xs text-muted-foreground">Товаров</p>
           </div>
         </div>
