@@ -83,7 +83,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [city, setCity] = useState('Алматы');
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
   const [excludedAllergens, setExcludedAllergens] = useState<string[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('purefood_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Save cart to local storage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('purefood_cart', JSON.stringify(cart));
+  }, [cart]);
+
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [favorites, setFavorites] = useState<string[]>(['1', '3']);
   const [reviews, setReviews] = useState<Review[]>(mockReviews);
