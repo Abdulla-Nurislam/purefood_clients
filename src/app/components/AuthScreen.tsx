@@ -18,7 +18,7 @@ function GoogleIcon() {
 }
 
 export function AuthScreen() {
-  const { setIsLoggedIn, setUserName, setPhone: setContextPhone, setCity, navigate } = useApp();
+  const { setIsLoggedIn, setUserId, setUserName, setPhone: setContextPhone, setCity, navigate } = useApp();
   const [step, setStep] = useState<AuthStep>('main');
   const [phone, setPhone] = useState('');
   const [smsCode, setSmsCode] = useState(['', '', '', '']);
@@ -69,14 +69,24 @@ export function AuthScreen() {
     setStep('sms');
   };
 
-  const handleVerifySms = () => {
+  const handleVerifySms = async () => {
     const code = smsCode.join('');
     if (code === '1234') {
       if (isNewUser) {
         setStep('profile');
       } else {
-        setIsLoggedIn(true);
-        navigate('/home');
+        const { getClientByPhone } = await import('../../lib/api');
+        const user = await getClientByPhone(phone);
+        if (user) {
+          setUserId(user.id);
+          setUserName(user.name || 'Пользователь');
+          setCity(user.city || 'Алматы');
+          setIsLoggedIn(true);
+          navigate('/home');
+        } else {
+          setIsNewUser(true);
+          setStep('profile');
+        }
       }
     } else {
       setSmsError(true);
@@ -91,7 +101,17 @@ export function AuthScreen() {
     navigate('/home');
   };
 
-  const handleFinishProfile = () => {
+  const handleFinishProfile = async () => {
+    const { registerClient } = await import('../../lib/api');
+    const newUser = await registerClient({
+      phone,
+      name: name || 'Пользователь',
+      city: selectedCity,
+    });
+    
+    if (newUser?.id) {
+      setUserId(newUser.id);
+    }
     setUserName(name || 'Пользователь');
     setCity(selectedCity);
     setIsLoggedIn(true);

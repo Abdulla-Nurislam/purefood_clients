@@ -213,7 +213,8 @@ export async function createOrder(
   cartItems: { product: Product; quantity: number }[],
   total: number,
   deliveryAddress: string,
-  paymentMethod: string
+  paymentMethod: string,
+  userId?: string
 ) {
   if (cartItems.length === 0) return null;
 
@@ -237,6 +238,7 @@ export async function createOrder(
       .insert({
         id: orderId,
         seller_id: sellerId,
+        user_id: userId || null,
         status: 'processing',
         total: sellerTotal,
         delivery_address: deliveryAddress,
@@ -267,4 +269,37 @@ export async function createOrder(
   }
 
   return orders;
+}
+
+// ---- Auth (Clients) ----
+
+export async function getClientByPhone(phone: string) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('phone', phone)
+    .single();
+    
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching user by phone:', error);
+  }
+  return data;
+}
+
+export async function registerClient(user: {
+  phone: string;
+  name?: string;
+  city?: string;
+}) {
+  const { data, error } = await supabase
+    .from('users')
+    .insert(user)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error registering user:', error);
+    return null;
+  }
+  return data;
 }

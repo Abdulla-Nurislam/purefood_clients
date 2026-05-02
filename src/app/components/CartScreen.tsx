@@ -6,7 +6,7 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useToast } from './SimpleToast';
 
 export function CartScreen() {
-  const { cart, updateQuantity, removeFromCart, cartTotal, navigate, clearCart, addOrder, addLoyaltyPoints } = useApp();
+  const { cart, updateQuantity, removeFromCart, cartTotal, navigate, clearCart, addOrder, addLoyaltyPoints, userId } = useApp();
   const toast = useToast();
   const [step, setStep] = useState<'cart' | 'checkout' | 'done'>('cart');
   const [deliveryType, setDeliveryType] = useState<'standard' | 'express'>('standard');
@@ -37,7 +37,8 @@ export function CartScreen() {
       cart, 
       total, 
       'Алматы, Абая 100', // mock delivery address
-      pm?.label || 'Онлайн оплата'
+      pm?.label || 'Онлайн оплата',
+      userId || undefined
     );
 
     // 2. Local state update for immediate UI

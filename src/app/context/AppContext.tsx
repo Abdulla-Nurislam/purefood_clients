@@ -10,6 +10,8 @@ interface AppState {
   setShowSplash: (v: boolean) => void;
   isLoggedIn: boolean;
   setIsLoggedIn: (v: boolean) => void;
+  userId: string | null;
+  setUserId: (v: string | null) => void;
   userName: string;
   setUserName: (v: string) => void;
   phone: string;
@@ -78,6 +80,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [showSplash, setShowSplash] = useState(true);
   const [isOnboarded, setOnboarded] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState('');
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('Алматы');
@@ -201,6 +204,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       showSplash, setShowSplash,
       isOnboarded, setOnboarded,
       isLoggedIn, setIsLoggedIn,
+      userId, setUserId,
       userName, setUserName,
       phone, setPhone,
       city, setCity,
