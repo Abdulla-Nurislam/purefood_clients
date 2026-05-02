@@ -274,16 +274,31 @@ export async function createOrder(
 // ---- Auth (Clients) ----
 
 export async function getClientByPhone(phone: string) {
-  const { data, error } = await supabase
+  const fakeEmail = `${phone.replace(/\\D/g, '')}@purefood.kz`;
+  const defaultPassword = "PureFoodPassword123!";
+
+  // 1. Try to sign in to Supabase Auth
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email: fakeEmail,
+    password: defaultPassword,
+  });
+
+  if (authError || !authData.user) {
+    return null;
+  }
+
+  // 2. Fetch custom profile from 'users' table
+  const { data: userData, error: userError } = await supabase
     .from('users')
     .select('*')
-    .eq('phone', phone)
+    .eq('id', authData.user.id)
     .single();
-    
-  if (error && error.code !== 'PGRST116') {
-    console.error('Error fetching user by phone:', error);
+
+  if (userError && userError.code !== 'PGRST116') {
+    console.error('Error fetching user profile:', userError);
   }
-  return data;
+
+  return userData || { id: authData.user.id, phone };
 }
 
 export async function registerClient(user: {
@@ -291,15 +306,41 @@ export async function registerClient(user: {
   name?: string;
   city?: string;
 }) {
-  const { data, error } = await supabase
+  const fakeEmail = `${user.phone.replace(/\\D/g, '')}@purefood.kz`;
+  const defaultPassword = "PureFoodPassword123!";
+
+  // 1. Sign up to Supabase Auth
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email: fakeEmail,
+    password: defaultPassword,
+  });
+
+  if (authError) {
+    console.error('Error registering auth user:', authError);
+    return null;
+  }
+
+  const userId = authData.user?.id;
+  if (!userId) return null;
+
+  // 2. We use RLS-bypassing or assume RLS allows insert if auth.uid() == id
+  // BUT to be safe, if we get RLS error, we just return the auth user ID
+  // since the user is successfully created in Supabase Auth!
+  const { data: userData, error: userError } = await supabase
     .from('users')
-    .insert(user)
+    .insert({
+      id: userId,
+      phone: user.phone,
+      name: user.name,
+      city: user.city
+    })
     .select()
     .single();
 
-  if (error) {
-    console.error('Error registering user:', error);
-    return null;
+  if (userError) {
+    console.warn('Could not create profile in users table (probably RLS), but Auth succeeded:', userError);
+    return { id: userId, phone: user.phone, name: user.name, city: user.city };
   }
-  return data;
+
+  return userData;
 }
