@@ -1,5 +1,6 @@
 import { useApp } from '../context/AppContext';
 import { ArrowLeft, Gift, Star, ShoppingCart, MessageSquare, TrendingUp } from 'lucide-react';
+import { useToast } from './SimpleToast';
 
 const rewards = [
   { points: 100, label: 'Скидка 1 000 ₸', description: 'На любой заказ' },
@@ -17,6 +18,7 @@ const history = [
 
 export function LoyaltyScreen() {
   const { goBack, loyaltyPoints } = useApp();
+  const toast = useToast();
 
   const currentLevel = loyaltyPoints < 300 ? 'Новичок' : loyaltyPoints < 700 ? 'Знаток' : 'Эксперт';
   const nextLevel = loyaltyPoints < 300 ? 'Знаток' : loyaltyPoints < 700 ? 'Эксперт' : 'Мастер';
@@ -82,7 +84,10 @@ export function LoyaltyScreen() {
                 <p className="text-sm">{reward.label}</p>
                 <p className="text-xs text-muted-foreground">{reward.description}</p>
               </div>
-              <button className={`px-3 py-1.5 rounded-xl text-xs ${canRedeem ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'}`}>
+              <button
+                onClick={() => canRedeem ? toast.success(`"${reward.label}" активирована!`) : toast.info(`Нужно ещё ${reward.points - loyaltyPoints} баллов`)}
+                className={`px-3 py-1.5 rounded-xl text-xs ${canRedeem ? 'bg-amber-500 text-white active:bg-amber-600' : 'bg-muted text-muted-foreground'}`}
+              >
                 {reward.points} б.
               </button>
             </div>

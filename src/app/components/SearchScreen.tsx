@@ -145,6 +145,21 @@ export function SearchScreen() {
       {/* Results */}
       <div className="px-4 pb-6">
         <p className="text-sm text-muted-foreground mb-3">Найдено: {filtered.length} товаров</p>
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
+            <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
+              <Search className="w-7 h-7 text-muted-foreground" />
+            </div>
+            <p className="text-muted-foreground text-sm">Ничего не найдено</p>
+            <p className="text-xs text-muted-foreground">Попробуйте изменить запрос или фильтры</p>
+            <button
+              onClick={() => { setQuery(''); setSelectedCategory(''); setSelectedTags([]); setExcludeAllergens([]); setSelectedOrigin(''); setOnlyVerified(false); }}
+              className="text-primary text-sm mt-1"
+            >
+              Сбросить всё
+            </button>
+          </div>
+        ) : (
         <div className="space-y-3">
           {filtered.map(product => (
             <div key={product.id} className="flex gap-3 bg-card border border-border rounded-2xl p-3 relative">
@@ -195,6 +210,7 @@ export function SearchScreen() {
             </div>
           ))}
         </div>
+        )}
       </div>
     </div>
   );

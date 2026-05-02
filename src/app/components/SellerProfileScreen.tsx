@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Product } from '../data/mock-data';
 import { ChevronLeft, Share2, ShieldCheck, Star, MapPin, Package, ShoppingCart, Heart, Check } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { useToast } from './SimpleToast';
 
 const badgeColors: Record<string, { bg: string; text: string }> = {
   'Проверенный состав': { bg: '#E8F5E9', text: '#2d7a3a' },
@@ -112,6 +113,7 @@ function SellerProductCard({ product }: { product: Product }) {
 
 export function SellerProfileScreen() {
   const { goBack, routeParams, allSellers, allProducts } = useApp();
+  const toast = useToast();
   const sellerId = routeParams.id;
 
   const seller = allSellers.find(s => s.id === sellerId);
@@ -138,7 +140,7 @@ export function SellerProfileScreen() {
           <ChevronLeft className="w-5 h-5" />
         </button>
         <p className="text-sm line-clamp-1 flex-1 text-center mx-3">{seller.name}</p>
-        <button className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center">
+        <button onClick={() => toast.info('Ссылка на продавца скопирована!')} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center">
           <Share2 className="w-4 h-4 text-foreground" />
         </button>
       </div>

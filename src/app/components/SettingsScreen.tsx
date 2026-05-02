@@ -94,13 +94,13 @@ export function SettingsScreen() {
 
       {/* Other */}
       <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-        <button className="w-full flex items-center gap-2 text-sm text-left">
+        <button onClick={() => toast.info('Смена языка в разработке')} className="w-full flex items-center gap-2 text-sm text-left">
           <Globe className="w-4 h-4 text-muted-foreground" /> Язык: Русский
         </button>
-        <button className="w-full flex items-center gap-2 text-sm text-left">
+        <button onClick={() => toast.info('Политика конфиденциальности в разработке')} className="w-full flex items-center gap-2 text-sm text-left">
           <Shield className="w-4 h-4 text-muted-foreground" /> Политика конфиденциальности
         </button>
-        <button className="w-full flex items-center gap-2 text-sm text-left">
+        <button onClick={() => toast.info('PureFood v1.0.0')} className="w-full flex items-center gap-2 text-sm text-left">
           <Moon className="w-4 h-4 text-muted-foreground" /> О приложении v1.0.0
         </button>
       </div>

@@ -20,7 +20,15 @@ export function ProductScreen() {
   const [showLabs, setShowLabs] = useState(false);
   const [showSubscribe, setShowSubscribe] = useState(false);
 
-  if (!product) return <div className="p-6 text-center">Товар не найден</div>;
+  if (!product) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center gap-3">
+      <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
+        <AlertTriangle className="w-8 h-8 text-muted-foreground" />
+      </div>
+      <p className="text-muted-foreground">Товар не найден</p>
+      <button onClick={goBack} className="text-primary text-sm">← Назад</button>
+    </div>
+  );
 
   const cartItem = cart.find(i => i.product.id === product.id);
   const hasCerts = product.certificates.length > 0;
@@ -69,7 +77,7 @@ export function ProductScreen() {
           <button onClick={() => toggleFavorite(product.id)} className="w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center">
             <Heart className={`w-5 h-5 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
           </button>
-          <button className="w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center">
+          <button onClick={() => toast.info('Ссылка скопирована!')} className="w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center">
             <Share2 className="w-5 h-5" />
           </button>
         </div>
