@@ -206,3 +206,65 @@ export async function fetchProductsBySeller(sellerId: string): Promise<Product[]
 
   return (data || []).map(mapProduct);
 }
+
+// ---- Orders ----
+
+export async function createOrder(
+  cartItems: { product: Product; quantity: number }[],
+  total: number,
+  deliveryAddress: string,
+  paymentMethod: string
+) {
+  if (cartItems.length === 0) return null;
+
+  // We group by seller. In a real app, you might create multiple orders if items are from different sellers.
+  // For simplicity, we create one order per seller
+  const itemsBySeller = cartItems.reduce((acc, item) => {
+    const sellerId = item.product.supplierId;
+    if (!acc[sellerId]) acc[sellerId] = [];
+    acc[sellerId].push(item);
+    return acc;
+  }, {} as Record<string, typeof cartItems>);
+
+  const orders = [];
+
+  for (const [sellerId, items] of Object.entries(itemsBySeller)) {
+    const orderId = `PF-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.floor(Math.random()*1000)}`;
+    const sellerTotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        id: orderId,
+        seller_id: sellerId,
+        status: 'processing',
+        total: sellerTotal,
+        delivery_address: deliveryAddress,
+        payment_method: paymentMethod,
+      })
+      .select()
+      .single();
+
+    if (orderError) {
+      console.error('Error creating order:', orderError);
+      continue;
+    }
+
+    const orderItems = items.map(item => ({
+      order_id: orderId,
+      product_id: item.product.id,
+      quantity: item.quantity,
+      price_at_order: item.product.price,
+    }));
+
+    const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+    
+    if (itemsError) {
+      console.error('Error creating order items:', itemsError);
+    } else {
+      orders.push(order);
+    }
+  }
+
+  return orders;
+}

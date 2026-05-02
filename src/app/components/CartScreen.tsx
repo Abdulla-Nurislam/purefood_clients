@@ -28,19 +28,31 @@ export function CartScreen() {
     }
   };
 
-  const handlePlaceOrder = () => {
-    const orderId = `ST-20260330-${String(Math.floor(Math.random() * 999)).padStart(3, '0')}`;
+  const handlePlaceOrder = async () => {
     const pm = paymentMethods.find(m => m.id === paymentMethod);
+    
+    // 1. Send to Supabase
+    const { createOrder } = await import('../../lib/api');
+    const newOrders = await createOrder(
+      cart, 
+      total, 
+      'Алматы, Абая 100', // mock delivery address
+      pm?.label || 'Онлайн оплата'
+    );
+
+    // 2. Local state update for immediate UI
+    const orderId = newOrders?.[0]?.id || `ST-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${String(Math.floor(Math.random() * 999)).padStart(3, '0')}`;
+    
     addOrder({
       id: orderId,
       items: [...cart],
       status: 'processing',
-      date: '30 марта 2026',
+      date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }),
       total,
       deliveryType: deliveryType === 'express' ? 'Экспресс' : 'Стандартная',
       paymentMethod: pm?.label || '',
       trackingSteps: [
-        { label: 'Заказ принят', done: true, time: '30 мар, ' + new Date().getHours() + ':' + String(new Date().getMinutes()).padStart(2, '0') },
+        { label: 'Заказ принят', done: true, time: new Date().getHours() + ':' + String(new Date().getMinutes()).padStart(2, '0') },
         { label: 'Собран на складе', done: false },
         { label: 'Передан курьеру', done: false },
         { label: 'В пути к вам', done: false },
