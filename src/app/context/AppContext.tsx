@@ -15,6 +15,10 @@ interface AppState {
   setUserId: (v: string | null) => void;
   userName: string;
   setUserName: (v: string) => void;
+  email: string;
+  setEmail: (v: string) => void;
+  avatarUrl: string;
+  setAvatarUrl: (v: string) => void;
   phone: string;
   setPhone: (v: string) => void;
   city: string;
@@ -83,6 +87,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState('');
+  const [email, setEmail] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('Алматы');
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
@@ -139,8 +145,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (session.user.app_metadata.provider === 'google') {
           const email = session.user.email || '';
           const name = session.user.user_metadata?.full_name || email.split('@')[0] || "Пользователь Google";
+          const avatar = session.user.user_metadata?.avatar_url || '';
           setUserId(session.user.id);
           setUserName(name);
+          setEmail(email);
+          setAvatarUrl(avatar);
           setIsLoggedIn(true);
         }
       }
@@ -226,6 +235,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isLoggedIn, setIsLoggedIn,
       userId, setUserId,
       userName, setUserName,
+      email, setEmail,
+      avatarUrl, setAvatarUrl,
       phone, setPhone,
       city, setCity,
       selectedPreferences, setSelectedPreferences,

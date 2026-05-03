@@ -2,7 +2,7 @@ import { useApp } from '../context/AppContext';
 import { User, MapPin, Settings, Star, Heart, MessageSquare, LogOut, ChevronRight, ShieldCheck, Gift, RefreshCw, Package } from 'lucide-react';
 
 export function ProfileScreen() {
-  const { userName, city, selectedPreferences, setOnboarded, setIsLoggedIn, navigate, loyaltyPoints, reviews, favorites, subscriptions, orders } = useApp();
+  const { userName, email, avatarUrl, city, selectedPreferences, setOnboarded, setIsLoggedIn, navigate, loyaltyPoints, reviews, favorites, subscriptions, orders } = useApp();
 
   const menuItems = [
     { icon: Package, label: 'Мои заказы', count: orders.length, path: '/orders' },
@@ -17,12 +17,19 @@ export function ProfileScreen() {
     <div className="px-4 pt-6 pb-4 space-y-4">
       {/* Profile header */}
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-          <User className="w-8 h-8 text-primary" />
-        </div>
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="Avatar" className="w-16 h-16 rounded-full object-cover shadow-sm" />
+        ) : (
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <User className="w-8 h-8 text-primary" />
+          </div>
+        )}
         <div>
           <h2>{userName || 'Пользователь'}</h2>
-          <p className="text-sm text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> {city}</p>
+          {email ? (
+            <p className="text-sm text-muted-foreground">{email}</p>
+          ) : null}
+          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" /> {city}</p>
         </div>
       </div>
 
