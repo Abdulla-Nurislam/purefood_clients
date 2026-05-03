@@ -339,7 +339,7 @@ export function AuthScreen() {
                 <input
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  placeholder="Введите имя"
+                  placeholder="Айгерим Сейткали"
                   className="flex-1 bg-transparent outline-none"
                   autoFocus
                 />
