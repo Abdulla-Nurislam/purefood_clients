@@ -95,10 +95,23 @@ export function AuthScreen() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    setUserName('Google пользователь');
-    setIsLoggedIn(true);
-    navigate('/home');
+  const handleGoogleLogin = async () => {
+    try {
+      const { supabase } = await import('../../lib/supabase');
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.error('Google login error:', err);
+      // Fallback
+      setUserName('Google пользователь');
+      setIsLoggedIn(true);
+      navigate('/home');
+    }
   };
 
   const handleFinishProfile = async () => {

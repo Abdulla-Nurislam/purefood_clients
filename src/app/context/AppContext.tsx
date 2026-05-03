@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { CartItem, Product, Seller, Order, Review, Subscription, Notification, products as mockProducts, mockSellers as mockSellersData, mockOrders, mockReviews, mockSubscriptions, mockNotifications } from '../data/mock-data';
 import { fetchProducts, fetchSellers } from '../../lib/api';
+import { supabase } from '../../lib/supabase';
 
 interface AppState {
   // Auth & onboarding
@@ -129,6 +130,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     loadData();
     return () => { mounted = false; };
+  }, []);
+
+  // Listen to Supabase Auth state changes (for Google Login)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        if (session.user.app_metadata.provider === 'google') {
+          const email = session.user.email || '';
+          const name = session.user.user_metadata?.full_name || email.split('@')[0] || "Пользователь Google";
+          setUserId(session.user.id);
+          setUserName(name);
+          setIsLoggedIn(true);
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const currentFullRoute = routeHistory[routeHistory.length - 1] || '/home';
