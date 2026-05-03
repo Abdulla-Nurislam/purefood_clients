@@ -83,7 +83,19 @@ const AppContext = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [showSplash, setShowSplash] = useState(true);
-  const [isOnboarded, setOnboarded] = useState(false);
+  const [isOnboarded, setOnboardedState] = useState(() => {
+    try {
+      return localStorage.getItem('purefood_onboarded') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const setOnboarded = (v: boolean) => {
+    setOnboardedState(v);
+    localStorage.setItem('purefood_onboarded', v ? 'true' : 'false');
+  };
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState('');
