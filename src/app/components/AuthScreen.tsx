@@ -97,7 +97,18 @@ export function AuthScreen() {
 
   const handleGoogleLogin = async () => {
     try {
-      const { supabase } = await import('../../lib/supabase');
+      const { supabase, isSupabaseAvailable } = await import('../../lib/supabase');
+      
+      // Check if the Supabase server is reachable before attempting redirect
+      const available = await isSupabaseAvailable();
+      if (!available) {
+        console.warn('Supabase is unreachable, using local login');
+        setUserName('Google пользователь');
+        setIsLoggedIn(true);
+        navigate('/home');
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
