@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { CartItem, Product, Seller, Order, Review, Subscription, Notification, products as mockProducts, mockSellers as mockSellersData, mockOrders, mockReviews, mockSubscriptions, mockNotifications } from '../data/mock-data';
-import { fetchProducts, fetchSellers } from '../../lib/api';
+import { CartItem, Product, Seller, Order, Review, Subscription, Notification, products as mockProducts, mockSellers as mockSellersData } from '../data/mock-data';
+import { fetchProducts, fetchSellers, fetchClientOrders } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 
 interface AppState {
@@ -119,12 +119,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('purefood_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
-  const [favorites, setFavorites] = useState<string[]>(['1', '3']);
-  const [reviews, setReviews] = useState<Review[]>(mockReviews);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>(mockSubscriptions);
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-  const [loyaltyPoints, setLoyaltyPoints] = useState(850);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [allProducts, setAllProducts] = useState<Product[]>(mockProducts);
   const [allSellers, setAllSellers] = useState<Seller[]>(mockSellersData);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -149,6 +149,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loadData();
     return () => { mounted = false; };
   }, []);
+
+  // Load real orders when user is authenticated
+  useEffect(() => {
+    if (!userId) return;
+    let mounted = true;
+    fetchClientOrders(userId).then(realOrders => {
+      if (mounted && realOrders.length > 0) {
+        setOrders(realOrders);
+      }
+    }).catch(err => {
+      console.error('Failed to load orders from Supabase:', err);
+    });
+    return () => { mounted = false; };
+  }, [userId]);
 
   // Listen to Supabase Auth state changes (for Google Login)
   useEffect(() => {

@@ -209,6 +209,85 @@ export async function fetchProductsBySeller(sellerId: string): Promise<Product[]
 
 // ---- Orders ----
 
+export async function fetchClientOrders(userId: string): Promise<Order[]> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*, order_items(*, products(*))')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching client orders:', error);
+    return [];
+  }
+
+  return (data || []).map(o => {
+    const items: CartItem[] = (o.order_items || []).map((oi: any) => ({
+      product: oi.products ? mapProduct({ ...oi.products, sellers: null, certificates: [], lab_tests: [] }) : {
+        id: oi.product_id,
+        name: 'Товар',
+        price: Number(oi.price_at_order),
+        image: '',
+        category: '',
+        supplier: '',
+        supplierId: '',
+        supplierVerified: false,
+        supplierRating: 0,
+        rating: 0,
+        reviewCount: 0,
+        tags: [],
+        allergens: [],
+        origin: '',
+        certificates: [],
+        labTests: [],
+        description: '',
+        composition: [],
+        weight: '',
+        badges: [],
+      },
+      quantity: oi.quantity,
+    }));
+
+    const statusMap: Record<string, Order['status']> = {
+      'new': 'processing',
+      'processing': 'processing',
+      'shipped': 'shipped',
+      'delivered': 'delivered',
+      'cancelled': 'cancelled',
+    };
+
+    return {
+      id: o.id,
+      items,
+      status: statusMap[o.status] || 'processing',
+      date: new Date(o.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }),
+      total: Number(o.total),
+      deliveryType: 'Стандартная',
+      paymentMethod: o.payment_method || '',
+      trackingSteps: buildTrackingSteps(o.status, o.created_at),
+    };
+  });
+}
+
+function buildTrackingSteps(status: string, createdAt: string) {
+  const time = new Date(createdAt);
+  const fmt = `${time.getDate()} ${time.toLocaleString('ru-RU', { month: 'short' })}, ${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}`;
+  const steps = [
+    { label: 'Заказ принят', done: true, time: fmt },
+    { label: 'Собран на складе', done: ['processing', 'shipped', 'delivered'].includes(status) },
+    { label: 'Передан курьеру', done: ['shipped', 'delivered'].includes(status) },
+    { label: 'В пути к вам', done: ['shipped', 'delivered'].includes(status) },
+    { label: 'Доставлен', done: status === 'delivered' },
+  ];
+  if (status === 'cancelled') {
+    return [
+      { label: 'Заказ принят', done: true, time: fmt },
+      { label: 'Отменён', done: true },
+    ];
+  }
+  return steps;
+}
+
 export async function createOrder(
   cartItems: { product: Product; quantity: number }[],
   total: number,
@@ -239,7 +318,7 @@ export async function createOrder(
         id: orderId,
         seller_id: sellerId,
         user_id: userId || null,
-        status: 'processing',
+        status: 'new',
         total: sellerTotal,
         delivery_address: deliveryAddress,
         payment_method: paymentMethod,
@@ -265,10 +344,26 @@ export async function createOrder(
       console.error('Error creating order items:', itemsError);
     } else {
       orders.push(order);
+      // Create activity for the seller's feed
+      await createActivityForOrder(sellerId, orderId);
     }
   }
 
   return orders;
+}
+
+async function createActivityForOrder(sellerId: string, orderId: string) {
+  try {
+    await supabase
+      .from('activities')
+      .insert({
+        seller_id: sellerId,
+        title: `Новый заказ #${orderId}`,
+        type: 'order',
+      });
+  } catch (err) {
+    console.error('Error creating activity:', err);
+  }
 }
 
 // ---- Auth (Clients) ----
