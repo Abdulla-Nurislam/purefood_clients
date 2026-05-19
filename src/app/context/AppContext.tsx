@@ -130,7 +130,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [routeHistory, setRouteHistory] = useState<string[]>(['/home']);
 
-  // Load real data from Supabase on mount
+  // Load real data from Supabase on mount and listen to changes
   useEffect(() => {
     let mounted = true;
     async function loadData() {
@@ -147,7 +147,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
     loadData();
-    return () => { mounted = false; };
+
+    // Subscribe to realtime changes in products and sellers
+    const channel = supabase.channel('public-data-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        if (mounted) loadData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sellers' }, () => {
+        if (mounted) loadData();
+      })
+      .subscribe();
+
+    return () => { 
+      mounted = false; 
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Load real orders when user is authenticated

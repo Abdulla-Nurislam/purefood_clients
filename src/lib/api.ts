@@ -68,7 +68,7 @@ function mapProduct(p: DbProduct): Product {
     oldPrice: p.old_price ?? undefined,
     image: p.image_url,
     category: p.category_id,
-    supplier: seller?.company_name ?? 'Неизвестный',
+    supplier: seller?.company_name || 'Неизвестный продавец',
     supplierId: p.seller_id,
     supplierVerified: seller?.verified ?? false,
     supplierRating: seller?.rating ?? 0,
@@ -100,7 +100,7 @@ function mapProduct(p: DbProduct): Product {
 function mapSeller(s: DbSeller): Seller {
   return {
     id: s.id,
-    name: s.company_name,
+    name: s.company_name || 'Неизвестный продавец',
     description: s.description,
     rating: s.rating,
     reviewCount: s.review_count,
