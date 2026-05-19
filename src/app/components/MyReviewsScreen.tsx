@@ -4,32 +4,9 @@ import { ArrowLeft, Star, Camera, Video, MessageSquare } from 'lucide-react';
 import { useToast } from './SimpleToast';
 
 export function MyReviewsScreen() {
-  const { goBack, reviews, addReview } = useApp();
-  const toast = useToast();
-  const [showNew, setShowNew] = useState(false);
-  const [reviewText, setReviewText] = useState('');
-  const [reviewRating, setReviewRating] = useState(5);
-  const [hasPhoto, setHasPhoto] = useState(false);
-  const [hasVideo, setHasVideo] = useState(false);
+  const { goBack, reviews } = useApp();
 
-  const submitReview = () => {
-    if (reviewText.trim()) {
-      addReview({
-        id: `r-${Date.now()}`,
-        productId: '1',
-        productName: 'Фермерский мёд горный',
-        rating: reviewRating,
-        text: reviewText,
-        date: '30 марта 2026',
-        hasPhoto,
-      });
-      setReviewText('');
-      setShowNew(false);
-      setHasPhoto(false);
-      setHasVideo(false);
-      toast.success('Отзыв отправлен! Спасибо.');
-    }
-  };
+
 
   return (
     <div className="px-4 pt-6 pb-6 space-y-4">
@@ -40,47 +17,7 @@ export function MyReviewsScreen() {
           </button>
           <h2>Мои отзывы</h2>
         </div>
-        <button onClick={() => setShowNew(!showNew)} className="text-sm text-primary">
-          + Новый
-        </button>
       </div>
-
-      {/* New review form */}
-      {showNew && (
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-3 animate-[fadeIn_0.3s_ease-out]">
-          <p className="text-sm">Оцените последний заказ</p>
-          <div className="flex gap-1 justify-center">
-            {[1, 2, 3, 4, 5].map(s => (
-              <button key={s} onClick={() => setReviewRating(s)}>
-                <Star className={`w-7 h-7 ${s <= reviewRating ? 'fill-yellow-400 text-yellow-400' : 'text-muted'}`} />
-              </button>
-            ))}
-          </div>
-          <textarea
-            value={reviewText}
-            onChange={e => setReviewText(e.target.value)}
-            placeholder="Расскажите о качестве продуктов..."
-            className="w-full bg-input-background border border-border rounded-xl p-3 text-sm min-h-[80px] resize-none"
-          />
-          <div className="flex gap-2">
-            <button
-              onClick={() => setHasPhoto(!hasPhoto)}
-              className={`flex items-center gap-1 px-3 py-2 rounded-xl text-sm ${hasPhoto ? 'bg-primary text-primary-foreground' : 'bg-secondary text-primary'}`}
-            >
-              <Camera className="w-4 h-4" /> Фото
-            </button>
-            <button
-              onClick={() => setHasVideo(!hasVideo)}
-              className={`flex items-center gap-1 px-3 py-2 rounded-xl text-sm ${hasVideo ? 'bg-primary text-primary-foreground' : 'bg-secondary text-primary'}`}
-            >
-              <Video className="w-4 h-4" /> Видео
-            </button>
-            <button onClick={submitReview} className="flex-1 bg-primary text-primary-foreground py-2 rounded-xl text-sm">
-              Отправить
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Existing reviews */}
       {reviews.length === 0 ? (

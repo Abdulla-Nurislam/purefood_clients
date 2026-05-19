@@ -9,12 +9,7 @@ const rewards = [
   { points: 1000, label: 'Подарочный набор', description: 'Эко-набор от партнёров' },
 ];
 
-const history = [
-  { action: 'Заказ ST-20260328-001', points: '+53', icon: ShoppingCart },
-  { action: 'Отзыв на мёд', points: '+20', icon: MessageSquare },
-  { action: 'Заказ ST-20260320-039', points: '+32', icon: ShoppingCart },
-  { action: 'Бонус за регистрацию', points: '+100', icon: Star },
-];
+const history: any[] = [];
 
 export function LoyaltyScreen() {
   const { goBack, loyaltyPoints } = useApp();
@@ -57,17 +52,17 @@ export function LoyaltyScreen() {
 
       {/* How to earn */}
       <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-        <h4 className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /> Как заработать</h4>
+        <h4 className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /> Как заработать бонусы</h4>
         <div className="space-y-2">
           {[
-            { label: 'Каждые 100 ₸ покупки', points: '+1 балл' },
-            { label: 'Отзыв с фото', points: '+20 баллов' },
-            { label: 'Отзыв с видео', points: '+50 баллов' },
-            { label: 'Оформить подписку', points: '+30 баллов' },
+            { label: 'С каждой покупки', points: '+1%' },
+            { label: 'При оплате Kaspi QR', points: '+1%' },
+            { label: 'В период акций', points: 'до +10%' },
+            { label: 'За подписку на товары', points: '+5%' },
           ].map(item => (
             <div key={item.label} className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">{item.label}</span>
-              <span className="text-primary text-xs">{item.points}</span>
+              <span className="text-primary font-medium text-xs">{item.points}</span>
             </div>
           ))}
         </div>
@@ -98,13 +93,19 @@ export function LoyaltyScreen() {
       {/* History */}
       <div className="space-y-2">
         <h4>История начислений</h4>
-        {history.map((item, i) => (
-          <div key={i} className="flex items-center gap-3 bg-card border border-border rounded-xl p-3">
-            <item.icon className="w-4 h-4 text-muted-foreground" />
-            <span className="flex-1 text-sm">{item.action}</span>
-            <span className="text-xs text-primary">{item.points}</span>
+        {history.length === 0 ? (
+          <div className="text-center py-6">
+            <p className="text-muted-foreground text-sm">У вас пока нет истории начислений</p>
           </div>
-        ))}
+        ) : (
+          history.map((item, i) => (
+            <div key={i} className="flex items-center gap-3 bg-card border border-border rounded-xl p-3">
+              <item.icon className="w-4 h-4 text-muted-foreground" />
+              <span className="flex-1 text-sm">{item.action}</span>
+              <span className="text-xs text-primary">{item.points}</span>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

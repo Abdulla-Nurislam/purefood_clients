@@ -128,13 +128,6 @@ export function SellersScreen() {
                   </div>
                 )}
 
-                {/* Rating overlay */}
-                <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur rounded-full px-2 py-0.5 flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                  <span className="text-xs">{seller.rating}</span>
-                  <span className="text-[10px] text-muted-foreground">({seller.reviewCount})</span>
-                </div>
-
                 {/* Name overlay */}
                 <div className="absolute bottom-2 left-3">
                   <p className="text-white text-sm">{seller.name}</p>

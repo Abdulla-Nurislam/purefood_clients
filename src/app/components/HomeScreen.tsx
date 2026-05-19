@@ -243,10 +243,6 @@ export function HomeScreen() {
                 </div>
                 <div className="p-2">
                   <p className="text-xs line-clamp-1">{seller.name}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
-                    <span className="text-[10px] text-muted-foreground">{seller.rating}</span>
-                  </div>
                 </div>
               </button>
             ))}

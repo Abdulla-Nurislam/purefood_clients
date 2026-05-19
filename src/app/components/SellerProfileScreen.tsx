@@ -172,17 +172,6 @@ export function SellerProfileScreen() {
                 </div>
               )}
             </div>
-            {/* Rating */}
-            <div className="flex items-center gap-1.5 mt-1">
-              {[1,2,3,4,5].map(star => (
-                <Star
-                  key={star}
-                  className={`w-3.5 h-3.5 ${star <= Math.round(seller.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                />
-              ))}
-              <span className="text-sm text-muted-foreground">{seller.rating}</span>
-              <span className="text-xs text-muted-foreground">({seller.reviewCount} отзывов)</span>
-            </div>
           </div>
         </div>
 
@@ -224,16 +213,8 @@ export function SellerProfileScreen() {
         )}
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-secondary rounded-xl p-3 text-center">
-            <p className="text-primary">{seller.rating}</p>
-            <p className="text-[10px] text-muted-foreground">Рейтинг</p>
-          </div>
-          <div className="bg-secondary rounded-xl p-3 text-center">
-            <p className="text-primary">{seller.reviewCount}</p>
-            <p className="text-[10px] text-muted-foreground">Отзывов</p>
-          </div>
-          <div className="bg-secondary rounded-xl p-3 text-center">
+        <div className="flex gap-2">
+          <div className="flex-1 bg-secondary rounded-xl p-3 text-center">
             <p className="text-primary">{sellerProducts.length || seller.productCount}</p>
             <p className="text-[10px] text-muted-foreground">Товаров</p>
           </div>

@@ -257,10 +257,9 @@ function ProductCardCatalog({ product, onClick, onFavorite, isFav }: {
         </div>
         <div className="p-2.5">
           <p className="text-xs line-clamp-2 mb-1">{product.name}</p>
-          {/* Seller + rating */}
+          {/* Seller */}
           <div className="flex items-center gap-1 mb-1">
-            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-[10px] text-muted-foreground">{product.supplierRating} · {product.supplier}</span>
+            <span className="text-[10px] text-muted-foreground">{product.supplier}</span>
           </div>
           {/* Badges */}
           {product.badges.length > 0 && (
