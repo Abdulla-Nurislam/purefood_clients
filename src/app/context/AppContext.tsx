@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { CartItem, Product, Seller, Order, Review, Subscription, Notification, products as mockProducts, mockSellers as mockSellersData } from '../data/mock-data';
+import { CartItem, Product, Seller, Order, Review, Subscription, Notification } from '../data/mock-data';
 import { fetchProducts, fetchSellers, fetchClientOrders } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 
@@ -125,8 +125,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
-  const [allProducts, setAllProducts] = useState<Product[]>(mockProducts);
-  const [allSellers, setAllSellers] = useState<Seller[]>(mockSellersData);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [allSellers, setAllSellers] = useState<Seller[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [routeHistory, setRouteHistory] = useState<string[]>(['/home']);
 
@@ -141,7 +141,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           if (sels.length > 0) setAllSellers(sels);
         }
       } catch (err) {
-        console.error('Failed to load data from Supabase, using mock data:', err);
+        console.error('Failed to load data from Supabase:', err);
       } finally {
         if (mounted) setIsLoadingData(false);
       }

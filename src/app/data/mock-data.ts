@@ -144,21 +144,11 @@ export const allergenOptions = [
 
 export const paymentMethods = [
   { id: 'card', label: 'Банковская карта', icon: '💳', detail: '**** 4532' },
-  { id: 'kaspi', label: 'Kaspi Pay', icon: '🏦', detail: 'Kaspi Gold' },
+  { id: 'kaspi', label: 'Мобильный перевод', icon: '🏦', detail: 'Банковский перевод' },
   { id: 'cash', label: 'Наличные', icon: '💵', detail: 'При получении' },
 ];
 
 export const cities = ['Алматы', 'Астана', 'Шымкент', 'Караганда', 'Актобе', 'Тараз', 'Павлодар', 'Усть-Каменогорск'];
 
-export const mockSellers: Seller[] = [];
 
-export const products: Product[] = [];
-
-export const mockOrders: Order[] = [];
-
-export const mockReviews: Review[] = [];
-
-export const mockSubscriptions: Subscription[] = [];
-
-export const mockNotifications: Notification[] = [];
 
