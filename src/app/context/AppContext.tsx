@@ -138,7 +138,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const [prods, sels] = await Promise.all([fetchProducts(), fetchSellers()]);
         if (mounted) {
           if (prods.length > 0) setAllProducts(prods);
-          if (sels.length > 0) setAllSellers(sels);
+          if (sels.length > 0) {
+            const updatedSellers = sels.map(s => ({
+              ...s,
+              productCount: prods.filter(p => p.supplierId === s.id).length
+            }));
+            setAllSellers(updatedSellers);
+          }
         }
       } catch (err) {
         console.error('Failed to load data from Supabase:', err);
