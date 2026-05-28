@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { ArrowLeft, ShieldCheck, Star, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, XCircle, Share2, Heart, Plus, Minus, Lock, RefreshCw } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -9,6 +9,21 @@ export function ProductScreen() {
   const id = routeParams.id;
   const toast = useToast();
   const product = allProducts.find(p => p.id === id);
+
+  useEffect(() => {
+    if (!product) return;
+    try {
+      const key = 'purefood_recently_viewed';
+      const stored = localStorage.getItem(key);
+      const list: Array<{ id: string; name: string; price: number; image: string; supplier: string }> = stored ? JSON.parse(stored) : [];
+      const filtered = list.filter(item => item.id !== product.id);
+      const entry = { id: product.id, name: product.name, price: product.price, image: product.image, supplier: product.supplier };
+      const updated = [entry, ...filtered].slice(0, 10);
+      localStorage.setItem(key, JSON.stringify(updated));
+    } catch (e) {
+      // localStorage may be unavailable
+    }
+  }, [product]);
 
   // Validation steps: composition → certificates → lab tests
   const [compositionViewed, setCompositionViewed] = useState(false);

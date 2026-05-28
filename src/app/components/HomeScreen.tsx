@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { catalogCategories, Product } from '../data/mock-data';
 import { ShieldCheck, Star, MapPin, Bell, Gift, Heart, Search, ChevronRight, Award } from 'lucide-react';
@@ -117,6 +118,21 @@ export function HomeScreen() {
   const recommended = allProducts.filter(p =>
     selectedPreferences.length === 0 || p.tags.some(t => selectedPreferences.includes(t))
   ).slice(0, 6);
+
+  const [recentlyViewed, setRecentlyViewed] = useState<Array<{ id: string; name: string; price: number; image: string; supplier: string }>>([]);
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('purefood_recently_viewed');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRecentlyViewed(parsed);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   return (
     <div className="flex flex-col">
@@ -248,6 +264,33 @@ export function HomeScreen() {
             ))}
           </div>
         </div>
+
+        {/* Recently viewed */}
+        {recentlyViewed.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3>Вы недавно смотрели</h3>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
+              {recentlyViewed.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => navigate(`/product/${item.id}`)}
+                  className="flex-shrink-0 w-32 bg-card rounded-2xl border border-border overflow-hidden text-left"
+                >
+                  <div className="aspect-square bg-muted overflow-hidden">
+                    <ImageWithFallback src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="p-2">
+                    <p className="text-xs line-clamp-2 leading-tight">{item.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.supplier}</p>
+                    <p className="text-xs text-primary mt-1">{item.price.toLocaleString()} ₸</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recommended products */}
         <div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { paymentMethods } from '../data/mock-data';
-import { Minus, Plus, Trash2, Truck, ShieldCheck, CheckCircle, CreditCard, Tag } from 'lucide-react';
+import { Minus, Plus, Trash2, Truck, ShieldCheck, CheckCircle, CreditCard, Tag, Sparkles } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useToast } from './SimpleToast';
 
@@ -239,6 +239,44 @@ export function CartScreen() {
           </div>
         ))}
       </div>
+
+      {/* Loyalty bonus notification */}
+      {cartTotal < 5000 ? (
+        <div className="relative overflow-hidden bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4">
+          <div className="absolute -right-3 -top-3 w-16 h-16 bg-amber-100 rounded-full opacity-40" />
+          <div className="relative flex items-start gap-3">
+            <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-4.5 h-4.5 text-amber-600" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-amber-900">Почти у цели!</p>
+              <p className="text-xs text-amber-700 leading-snug">
+                Добавьте еды ещё на <span className="font-bold text-amber-900">{(5000 - cartTotal).toLocaleString()} ₸</span>, чтобы получить повышенный бонус <span className="font-bold text-amber-900">10%</span>
+              </p>
+              <div className="w-full bg-amber-100 rounded-full h-1.5 mt-2">
+                <div
+                  className="bg-amber-500 rounded-full h-1.5"
+                  style={{ width: `${Math.min((cartTotal / 5000) * 100, 100)}%`, transition: 'width 0.3s ease-out' }}
+                />
+              </div>
+              <p className="text-[10px] text-amber-500 mt-0.5">{cartTotal.toLocaleString()} / 5 000 ₸</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="relative overflow-hidden bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-2xl p-4">
+          <div className="absolute -right-3 -top-3 w-16 h-16 bg-emerald-100 rounded-full opacity-40" />
+          <div className="relative flex items-center gap-3">
+            <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-4.5 h-4.5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-emerald-900">Повышенный бонус активен! 🎉</p>
+              <p className="text-xs text-emerald-700">Вы получите повышенный бонус 10% с этого заказа</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Quick summary */}
       <div className="bg-card border border-border rounded-2xl p-4 space-y-2">

@@ -1,5 +1,63 @@
+import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { User, MapPin, Settings, Star, Heart, MessageSquare, LogOut, ChevronRight, ShieldCheck, Gift, RefreshCw, Package } from 'lucide-react';
+import { User, MapPin, Settings, Star, Heart, MessageSquare, LogOut, ChevronRight, ShieldCheck, Gift, RefreshCw, Package, Leaf } from 'lucide-react';
+
+function EcoStatusWidget() {
+  const [ecoPoints, setEcoPoints] = useState(() => {
+    try {
+      const stored = localStorage.getItem('purefood_eco_points');
+      return stored ? parseInt(stored, 10) : 0;
+    } catch {
+      return 0;
+    }
+  });
+
+  useEffect(() => {
+    const bonus = Math.floor(Math.random() * 5) + 1;
+    setEcoPoints(prev => {
+      const newVal = Math.min(prev + bonus, 100);
+      try {
+        localStorage.setItem('purefood_eco_points', String(newVal));
+      } catch {
+        // ignore
+      }
+      return newVal;
+    });
+  }, []);
+
+  const getEcoLevel = (pts: number) => {
+    if (pts >= 91) return { label: 'Эко-легенда', emoji: '🏆', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', barColor: 'bg-amber-500' };
+    if (pts >= 61) return { label: 'Эко-герой', emoji: '🌍', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', barColor: 'bg-emerald-500' };
+    if (pts >= 31) return { label: 'Защитник', emoji: '🌿', color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', barColor: 'bg-green-500' };
+    return { label: 'Новичок', emoji: '🌱', color: 'text-lime-600', bg: 'bg-lime-50', border: 'border-lime-200', barColor: 'bg-lime-500' };
+  };
+
+  const level = getEcoLevel(ecoPoints);
+
+  const nextLevel = ecoPoints < 31 ? 'Защитник 🌿 (31)' : ecoPoints < 61 ? 'Эко-герой 🌍 (61)' : ecoPoints < 91 ? 'Эко-легенда 🏆 (91)' : 'Максимум!';
+
+  return (
+    <div className={`${level.bg} border ${level.border} rounded-2xl p-4 space-y-3`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Leaf className={`w-5 h-5 ${level.color}`} />
+          <div>
+            <p className="text-sm font-medium">Эко-статус</p>
+            <p className={`text-xs ${level.color}`}>{level.emoji} {level.label}</p>
+          </div>
+        </div>
+        <span className={`text-lg font-bold ${level.color}`}>{ecoPoints}/100</span>
+      </div>
+      <div className="w-full bg-white/60 rounded-full h-2.5 overflow-hidden">
+        <div
+          className={`${level.barColor} rounded-full h-2.5`}
+          style={{ width: `${ecoPoints}%`, transition: 'width 1s ease-out' }}
+        />
+      </div>
+      <p className="text-[10px] text-muted-foreground">Покупайте эко-продукты и повышайте свой эко-уровень. Следующий уровень: {nextLevel}</p>
+    </div>
+  );
+}
 
 export function ProfileScreen() {
   const { userName, email, avatarUrl, city, selectedPreferences, setOnboarded, setIsLoggedIn, navigate, loyaltyPoints, reviews, favorites, subscriptions, orders } = useApp();
@@ -49,6 +107,9 @@ export function ProfileScreen() {
           <span className="text-xs">85/100</span>
         </div>
       </div>
+
+      {/* Eco status */}
+      <EcoStatusWidget />
 
       {/* Loyalty quick card */}
       <button onClick={() => navigate('/loyalty')} className="w-full bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
