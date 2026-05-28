@@ -127,7 +127,6 @@ export async function fetchProducts(): Promise<Product[]> {
       certificates (*),
       lab_tests (*)
     `)
-    .eq('is_active', true)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -136,6 +135,18 @@ export async function fetchProducts(): Promise<Product[]> {
   }
 
   return (data || []).map(mapProduct);
+}
+
+// Записывает просмотр товара в таблицу product_views (для аналитики продавца)
+export async function recordProductView(productId: string, sellerId: string): Promise<void> {
+  const { error } = await supabase
+    .from('product_views')
+    .insert({ product_id: productId, seller_id: sellerId });
+
+  if (error) {
+    // Не блокируем пользователя если запись не удалась
+    console.warn('Could not record product view:', error.message);
+  }
 }
 
 export async function fetchProductById(id: string): Promise<Product | null> {

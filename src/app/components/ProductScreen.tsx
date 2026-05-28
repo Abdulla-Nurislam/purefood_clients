@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { ArrowLeft, ShieldCheck, Star, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, XCircle, Share2, Heart, Plus, Minus, Lock, RefreshCw } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useToast } from './SimpleToast';
+import { recordProductView } from '../../lib/api';
 
 export function ProductScreen() {
   const { addToCart, cart, updateQuantity, routeParams, goBack, navigate, isFavorite, toggleFavorite, subscriptions, addSubscription, allProducts } = useApp();
@@ -12,6 +13,8 @@ export function ProductScreen() {
 
   useEffect(() => {
     if (!product) return;
+
+    // Сохраняем в localStorage для виджета "недавно просмотренные"
     try {
       const key = 'purefood_recently_viewed';
       const stored = localStorage.getItem(key);
@@ -22,6 +25,11 @@ export function ProductScreen() {
       localStorage.setItem(key, JSON.stringify(updated));
     } catch (e) {
       // localStorage may be unavailable
+    }
+
+    // Записываем реальный просмотр в Supabase для аналитики продавца
+    if (product.supplierId) {
+      recordProductView(product.id, product.supplierId);
     }
   }, [product]);
 
