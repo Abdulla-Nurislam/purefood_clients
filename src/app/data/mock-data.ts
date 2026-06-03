@@ -143,8 +143,8 @@ export const allergenOptions = [
 ];
 
 export const paymentMethods = [
-  { id: 'card', label: 'Банковская карта', icon: '💳', detail: '**** 4532' },
-  { id: 'kaspi', label: 'Мобильный перевод', icon: '🏦', detail: 'Банковский перевод' },
+  { id: 'card', label: 'Банковская карта', icon: '💳', detail: '' },
+  { id: 'kaspi', label: 'Kaspi Gold', icon: '🏦', detail: 'Перевод по номеру' },
   { id: 'cash', label: 'Наличные', icon: '💵', detail: 'При получении' },
 ];
 

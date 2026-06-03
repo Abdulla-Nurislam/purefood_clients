@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { User, MapPin, Settings, Star, Heart, MessageSquare, LogOut, ChevronRight, ShieldCheck, Gift, RefreshCw, Package, Leaf } from 'lucide-react';
+import { User, MapPin, Settings, Star, Heart, MessageSquare, LogOut, ChevronRight, ShieldCheck, Gift, RefreshCw, Package, Leaf, Check } from 'lucide-react';
+import { preferences } from '../data/mock-data';
 
 function EcoStatusWidget() {
+  const [showEcoModal, setShowEcoModal] = useState(false);
   const [ecoPoints, setEcoPoints] = useState(() => {
     try {
       const stored = localStorage.getItem('purefood_eco_points');
@@ -37,30 +39,63 @@ function EcoStatusWidget() {
   const nextLevel = ecoPoints < 31 ? 'Защитник 🌿 (31)' : ecoPoints < 61 ? 'Эко-герой 🌍 (61)' : ecoPoints < 91 ? 'Эко-легенда 🏆 (91)' : 'Максимум!';
 
   return (
-    <div className={`${level.bg} border ${level.border} rounded-2xl p-4 space-y-3`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Leaf className={`w-5 h-5 ${level.color}`} />
-          <div>
-            <p className="text-sm font-medium">Эко-статус</p>
-            <p className={`text-xs ${level.color}`}>{level.emoji} {level.label}</p>
+    <>
+      <div onClick={() => setShowEcoModal(true)} className={`${level.bg} border ${level.border} rounded-2xl p-4 space-y-3 cursor-pointer`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Leaf className={`w-5 h-5 ${level.color}`} />
+            <div>
+              <p className="text-sm font-medium">Эко-статус</p>
+              <p className={`text-xs ${level.color}`}>{level.emoji} {level.label}</p>
+            </div>
+          </div>
+          <span className={`text-lg font-bold ${level.color}`}>{ecoPoints}/100</span>
+        </div>
+        <div className="w-full bg-white/60 rounded-full h-2.5 overflow-hidden">
+          <div
+            className={`${level.barColor} rounded-full h-2.5`}
+            style={{ width: `${ecoPoints}%`, transition: 'width 1s ease-out' }}
+          />
+        </div>
+        <p className="text-[10px] text-muted-foreground">Покупайте эко-продукты и повышайте свой эко-уровень. Следующий уровень: {nextLevel}</p>
+      </div>
+
+      {showEcoModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/50 p-4">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm animate-[slideUp_0.3s_ease-out]">
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden" />
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Leaf className="w-6 h-6 text-green-600" /> Об Эко-статусе</h3>
+            <div className="space-y-4 text-sm">
+              <p>Ваш <b>Эко-статус</b> показывает ваш вклад в защиту окружающей среды и осознанное потребление.</p>
+              <div className="space-y-2">
+                <p>🌱 <b>Новичок (0-30):</b> Начало пути. Базовые эко-рекомендации.</p>
+                <p>🌿 <b>Защитник (31-60):</b> +2% кэшбека на органические товары.</p>
+                <p>🌍 <b>Эко-герой (61-90):</b> +5% кэшбека и бесплатная эко-упаковка.</p>
+                <p>🏆 <b>Эко-легенда (91-100):</b> +10% кэшбека на всё и приоритетная доставка.</p>
+              </div>
+              <p className="text-muted-foreground mt-4 text-xs">Покупайте продукты со значком «Эко» или «Органик», сдавайте упаковку на переработку и ваш статус будет расти!</p>
+            </div>
+            <button onClick={() => setShowEcoModal(false)} className="w-full bg-primary text-primary-foreground py-3 rounded-xl mt-6 font-medium">
+              Понятно
+            </button>
           </div>
         </div>
-        <span className={`text-lg font-bold ${level.color}`}>{ecoPoints}/100</span>
-      </div>
-      <div className="w-full bg-white/60 rounded-full h-2.5 overflow-hidden">
-        <div
-          className={`${level.barColor} rounded-full h-2.5`}
-          style={{ width: `${ecoPoints}%`, transition: 'width 1s ease-out' }}
-        />
-      </div>
-      <p className="text-[10px] text-muted-foreground">Покупайте эко-продукты и повышайте свой эко-уровень. Следующий уровень: {nextLevel}</p>
-    </div>
+      )}
+    </>
   );
 }
 
 export function ProfileScreen() {
-  const { userName, email, avatarUrl, city, selectedPreferences, setOnboarded, setIsLoggedIn, navigate, loyaltyPoints, reviews, favorites, subscriptions, orders } = useApp();
+  const { userName, email, avatarUrl, city, selectedPreferences, setSelectedPreferences, setOnboarded, setIsLoggedIn, navigate, loyaltyPoints, reviews, favorites, subscriptions, orders } = useApp();
+
+  const [showPrefModal, setShowPrefModal] = useState(false);
+  const togglePref = (p: string) => {
+    if (selectedPreferences.includes(p)) {
+      setSelectedPreferences(selectedPreferences.filter(x => x !== p));
+    } else {
+      setSelectedPreferences([...selectedPreferences, p]);
+    }
+  };
 
   const menuItems = [
     { icon: Package, label: 'Мои заказы', count: orders.length, path: '/orders' },
@@ -91,22 +126,7 @@ export function ProfileScreen() {
         </div>
       </div>
 
-      {/* Trust score */}
-      <div className="bg-gradient-to-r from-primary to-emerald-600 rounded-2xl p-4 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm opacity-90">Уровень доверия</p>
-            <p className="text-2xl mt-1">Эксперт</p>
-          </div>
-          <ShieldCheck className="w-12 h-12 opacity-30" />
-        </div>
-        <div className="flex items-center gap-2 mt-2">
-          <div className="flex-1 bg-white/20 rounded-full h-2">
-            <div className="bg-white rounded-full h-2 w-[85%]" />
-          </div>
-          <span className="text-xs">85/100</span>
-        </div>
-      </div>
+      {/* Trust score removed */}
 
       {/* Eco status */}
       <EcoStatusWidget />
@@ -126,8 +146,11 @@ export function ProfileScreen() {
       </button>
 
       {/* Preferences */}
-      <div className="bg-card border border-border rounded-2xl p-4">
-        <h4 className="mb-2">Мои предпочтения</h4>
+      <button onClick={() => setShowPrefModal(true)} className="w-full bg-card border border-border rounded-2xl p-4 text-left block">
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="m-0">Мои предпочтения</h4>
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+        </div>
         <div className="flex flex-wrap gap-1.5">
           {selectedPreferences.length > 0 ? selectedPreferences.map(p => (
             <span key={p} className="text-xs bg-secondary text-primary px-2.5 py-1 rounded-full">{p}</span>
@@ -135,7 +158,38 @@ export function ProfileScreen() {
             <p className="text-sm text-muted-foreground">Не выбраны</p>
           )}
         </div>
-      </div>
+      </button>
+
+      {/* Preferences Modal */}
+      {showPrefModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/50 p-4">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md animate-[slideUp_0.3s_ease-out] max-h-[80vh] flex flex-col">
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden flex-shrink-0" />
+            <h3 className="text-xl font-bold mb-4">Выберите ваши предпочтения</h3>
+            <p className="text-sm text-muted-foreground mb-4">Мы будем показывать больше продуктов, подходящих под ваши диеты и особенности.</p>
+            <div className="flex-1 overflow-y-auto min-h-0 space-y-2 mb-4">
+              {preferences.map(p => {
+                const isSelected = selectedPreferences.includes(p);
+                return (
+                  <button
+                    key={p}
+                    onClick={() => togglePref(p)}
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border ${isSelected ? 'border-primary bg-secondary' : 'border-border'}`}
+                  >
+                    <span className="text-sm">{p}</span>
+                    <div className={`w-5 h-5 rounded flex items-center justify-center ${isSelected ? 'bg-primary text-white' : 'border border-muted-foreground'}`}>
+                      {isSelected && <Check className="w-3 h-3" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <button onClick={() => setShowPrefModal(false)} className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium mt-auto flex-shrink-0">
+              Сохранить
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Menu */}
       <div className="space-y-2">

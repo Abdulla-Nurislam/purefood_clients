@@ -1,18 +1,26 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { paymentMethods } from '../data/mock-data';
-import { Minus, Plus, Trash2, Truck, ShieldCheck, CheckCircle, CreditCard, Tag, Sparkles } from 'lucide-react';
+import { Minus, Plus, Trash2, Truck, ShieldCheck, CheckCircle, CreditCard, Tag, Sparkles, Lock, X } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useToast } from './SimpleToast';
 
 export function CartScreen() {
   const { cart, updateQuantity, removeFromCart, cartTotal, navigate, clearCart, addOrder, addLoyaltyPoints, userId } = useApp();
   const toast = useToast();
-  const [step, setStep] = useState<'cart' | 'checkout' | 'done'>('cart');
+  const [step, setStep] = useState<'cart' | 'checkout' | 'kaspi_payment' | 'done'>('cart');
   const [deliveryType, setDeliveryType] = useState<'standard' | 'express'>('standard');
   const [paymentMethod, setPaymentMethod] = useState('kaspi');
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
+
+  // Card payment modal
+  const [showCardModal, setShowCardModal] = useState(false);
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
+  const [cardProcessing, setCardProcessing] = useState(false);
+  const [cardDone, setCardDone] = useState(false);
 
   const deliveryCost = deliveryType === 'express' ? 1500 : cart.length > 0 ? 500 : 0;
   const discount = promoApplied ? Math.round(cartTotal * 0.1) : 0;
@@ -29,6 +37,45 @@ export function CartScreen() {
   };
 
   const handlePlaceOrder = async () => {
+    if (paymentMethod === 'kaspi') {
+      setStep('kaspi_payment');
+      return;
+    }
+    if (paymentMethod === 'card') {
+      setShowCardModal(true);
+      return;
+    }
+    await finalizeOrder();
+  };
+
+  const formatCardNumber = (val: string) => {
+    const digits = val.replace(/\D/g, '').slice(0, 16);
+    return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
+  };
+
+  const formatExpiry = (val: string) => {
+    const digits = val.replace(/\D/g, '').slice(0, 4);
+    if (digits.length >= 3) return digits.slice(0, 2) + '/' + digits.slice(2);
+    return digits;
+  };
+
+  const handleCardPay = () => {
+    setCardProcessing(true);
+    setTimeout(async () => {
+      setCardProcessing(false);
+      setCardDone(true);
+      setTimeout(async () => {
+        setShowCardModal(false);
+        setCardNumber('');
+        setCardExpiry('');
+        setCardCvc('');
+        setCardDone(false);
+        await finalizeOrder();
+      }, 600);
+    }, 2000);
+  };
+
+  const finalizeOrder = async () => {
     const pm = paymentMethods.find(m => m.id === paymentMethod);
     
     // 1. Send to Supabase
@@ -65,6 +112,159 @@ export function CartScreen() {
     setStep('done');
   };
 
+  // ── CloudPayments Sandbox Modal ──────────────────────────────────────────
+  const cardModalJsx = showCardModal ? (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+      style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)' }}
+      onClick={(e) => { if (e.target === e.currentTarget && !cardProcessing) { setShowCardModal(false); } }}
+    >
+      <div className="relative bg-card border border-border rounded-t-3xl sm:rounded-3xl w-full max-w-sm px-6 pt-7 pb-8 shadow-2xl animate-[slideUp_0.3s_cubic-bezier(0.32,0.72,0,1)]">
+        {/* Handle */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 bg-border rounded-full sm:hidden" />
+
+        {/* Header */}
+        <div className="flex items-start justify-between mb-1">
+          <div>
+            <p className="text-[10px] font-medium text-primary uppercase tracking-widest mb-0.5">Тестовый режим</p>
+            <h3 className="text-base font-semibold leading-tight">Симуляция CloudPayments</h3>
+          </div>
+          {!cardProcessing && (
+            <button
+              onClick={() => setShowCardModal(false)}
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-secondary text-muted-foreground hover:bg-border transition-colors -mt-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Amount chip */}
+        <div className="mt-4 mb-5 bg-secondary rounded-2xl px-4 py-3 flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Сумма к оплате</span>
+          <span className="text-lg font-bold text-primary">{total.toLocaleString()} ₸</span>
+        </div>
+
+        {/* Card number */}
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs text-muted-foreground mb-1.5 font-medium">Номер карты</label>
+            <div className="relative">
+              <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="0000 0000 0000 0000"
+                value={cardNumber}
+                onChange={e => setCardNumber(formatCardNumber(e.target.value))}
+                disabled={cardProcessing || cardDone}
+                className="w-full pl-9 pr-3 py-3 bg-secondary border border-border rounded-xl text-sm tracking-widest placeholder:tracking-normal placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60"
+              />
+            </div>
+          </div>
+
+          {/* Expiry + CVC row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1.5 font-medium">Срок действия</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="ММ/ГГ"
+                value={cardExpiry}
+                onChange={e => setCardExpiry(formatExpiry(e.target.value))}
+                disabled={cardProcessing || cardDone}
+                className="w-full px-3 py-3 bg-secondary border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1.5 font-medium">CVC</label>
+              <div className="relative">
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  placeholder="•••"
+                  maxLength={4}
+                  value={cardCvc}
+                  onChange={e => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  disabled={cardProcessing || cardDone}
+                  className="w-full pl-3 pr-8 py-3 bg-secondary border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60"
+                />
+                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Hint */}
+        <p className="mt-3 text-[11px] text-muted-foreground text-center">
+          💡 Для теста введите любые цифры
+        </p>
+
+        {/* Pay button */}
+        <button
+          onClick={handleCardPay}
+          disabled={cardProcessing || cardDone}
+          className="mt-5 w-full bg-primary text-primary-foreground py-3.5 rounded-2xl font-medium text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-75"
+        >
+          {cardDone ? (
+            <><CheckCircle className="w-5 h-5" /> Оплачено!</>
+          ) : cardProcessing ? (
+            <>
+              <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+              Обработка транзакции…
+            </>
+          ) : (
+            <>Оплатить · {total.toLocaleString()} ₸</>
+          )}
+        </button>
+
+        {/* Security badge */}
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
+          <Lock className="w-3 h-3" />
+          <span>Защищено CloudPayments · PCI DSS Level 1</span>
+        </div>
+      </div>
+    </div>
+  ) : null;
+  // ──────────────────────────────────────────────────────────────────────────
+
+  if (step === 'kaspi_payment') {
+    return (
+      <div className="px-4 pt-6 pb-4 space-y-4 animate-[fadeIn_0.3s_ease-out]">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setStep('checkout')} className="text-primary text-sm">← Назад</button>
+          <h2>Оплата Kaspi Gold</h2>
+        </div>
+        
+        <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-4">
+          <div className="w-16 h-16 bg-[#F14635]/10 rounded-2xl flex items-center justify-center mx-auto">
+            <span className="text-3xl">🏦</span>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Сумма к оплате</p>
+            <p className="text-3xl font-bold">{total.toLocaleString()} ₸</p>
+          </div>
+          
+          <div className="bg-secondary rounded-xl p-4 text-left">
+            <p className="text-xs text-muted-foreground mb-1">Перевод по номеру телефона</p>
+            <p className="text-lg font-medium">+7 777 000 00 00</p>
+            <p className="text-sm mt-1">Получатель: Nurislam A.</p>
+          </div>
+          
+          <p className="text-sm text-muted-foreground">После совершения перевода в приложении Kaspi.kz, нажмите кнопку ниже для подтверждения.</p>
+        </div>
+
+        <button onClick={finalizeOrder} className="w-full bg-[#F14635] text-white py-4 rounded-2xl font-medium mt-4 shadow-sm hover:bg-[#D93F2F] active:scale-95 transition-all">
+          Я оплатил
+        </button>
+      </div>
+    );
+  }
+
   if (step === 'done') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center gap-4 animate-[fadeIn_0.4s_ease-out]">
@@ -99,11 +299,12 @@ export function CartScreen() {
 
   if (step === 'checkout') {
     return (
-      <div className="px-4 pt-6 pb-4 space-y-4 animate-[fadeIn_0.3s_ease-out]">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setStep('cart')} className="text-primary text-sm">← Корзина</button>
-          <h2>Оформление</h2>
-        </div>
+      <>
+        <div className="px-4 pt-6 pb-4 space-y-4 animate-[fadeIn_0.3s_ease-out]">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStep('cart')} className="text-primary text-sm">← Корзина</button>
+            <h2>Оформление</h2>
+          </div>
 
         {/* Delivery */}
         <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
@@ -196,16 +397,19 @@ export function CartScreen() {
           <p className="text-xs text-muted-foreground">Вы заработаете +{earnedPoints} баллов лояльности</p>
         </div>
 
-        <button onClick={handlePlaceOrder} className="w-full bg-primary text-primary-foreground py-4 rounded-2xl">
-          Оплатить · {total.toLocaleString()} ₸
-        </button>
-      </div>
+          <button onClick={handlePlaceOrder} className="w-full bg-primary text-primary-foreground py-4 rounded-2xl">
+            Оплатить · {total.toLocaleString()} ₸
+          </button>
+        </div>
+        {cardModalJsx}
+      </>
     );
   }
 
   return (
-    <div className="px-4 pt-6 pb-4 space-y-4">
-      <h2>Корзина</h2>
+    <>
+      <div className="px-4 pt-6 pb-4 space-y-4">
+        <h2>Корзина</h2>
 
       {/* Items */}
       <div className="space-y-3">
@@ -290,9 +494,11 @@ export function CartScreen() {
         </div>
       </div>
 
-      <button onClick={() => setStep('checkout')} className="w-full bg-primary text-primary-foreground py-4 rounded-2xl">
-        К оформлению · {cartTotal.toLocaleString()} ₸
-      </button>
-    </div>
+        <button onClick={() => setStep('checkout')} className="w-full bg-primary text-primary-foreground py-4 rounded-2xl">
+          К оформлению · {cartTotal.toLocaleString()} ₸
+        </button>
+      </div>
+      {cardModalJsx}
+    </>
   );
 }
