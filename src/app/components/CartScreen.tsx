@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { paymentMethods } from '../data/mock-data';
 import { Minus, Plus, Trash2, Truck, ShieldCheck, CheckCircle, CreditCard, Tag, Sparkles, Lock, X } from 'lucide-react';
@@ -6,13 +6,25 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useToast } from './SimpleToast';
 
 export function CartScreen() {
-  const { cart, updateQuantity, removeFromCart, cartTotal, navigate, clearCart, addOrder, addLoyaltyPoints, userId } = useApp();
+  const { cart, updateQuantity, removeFromCart, cartTotal, navigate, clearCart, addOrder, addLoyaltyPoints, userId, allProducts, isLoadingData } = useApp();
   const toast = useToast();
   const [step, setStep] = useState<'cart' | 'checkout' | 'kaspi_payment' | 'done'>('cart');
   const [deliveryType, setDeliveryType] = useState<'standard' | 'express'>('standard');
   const [paymentMethod, setPaymentMethod] = useState('kaspi');
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
+
+  // Sync cart with active products: remove products that were deleted by the seller
+  useEffect(() => {
+    if (isLoadingData) return;
+    cart.forEach(item => {
+      // If the product no longer exists in the loaded allProducts array, it was deleted/deactivated
+      if (!allProducts.some(p => p.id === item.product.id)) {
+        removeFromCart(item.product.id);
+        toast.error(`Товар «${item.product.name}» был удален продавцом и убран из корзины`);
+      }
+    });
+  }, [cart, allProducts, isLoadingData, removeFromCart, toast]);
 
   // Card payment modal
   const [showCardModal, setShowCardModal] = useState(false);
