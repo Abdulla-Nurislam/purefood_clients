@@ -60,7 +60,8 @@ async function seed() {
     description: p.description,
     composition: p.composition,
     weight: p.weight,
-    badges: p.badges
+    badges: p.badges,
+    is_active: true,
   }));
 
   const { error: prodError } = await supabase
