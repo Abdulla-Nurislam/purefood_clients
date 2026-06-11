@@ -49,7 +49,7 @@ export function CatalogScreen() {
     if (query && !p.name.toLowerCase().includes(query.toLowerCase()) && !p.supplier.toLowerCase().includes(query.toLowerCase())) return false;
     if (activeCatData) {
       const tagMatch = activeCatData.tagFilter ? p.tags.includes(activeCatData.tagFilter) : false;
-      const catMatch = activeCatData.catFilter ? p.category === activeCatData.catFilter : false;
+      const catMatch = activeCatData.catFilters ? activeCatData.catFilters.includes(p.category) : false;
       // Product must match EITHER the tag filter OR the category filter (or both)
       if (!tagMatch && !catMatch) return false;
     }
@@ -171,7 +171,7 @@ export function CatalogScreen() {
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {allProducts.filter(p => {
                         const tagMatch = cat.tagFilter ? p.tags.includes(cat.tagFilter) : false;
-                        const catMatch = cat.catFilter ? p.category === cat.catFilter : false;
+                        const catMatch = cat.catFilters ? cat.catFilters.includes(p.category) : false;
                         return tagMatch || catMatch;
                       }).length} товаров
                     </p>

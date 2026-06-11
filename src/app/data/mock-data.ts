@@ -110,15 +110,19 @@ export const categories = [
   { id: 'meat', name: 'Мясо', icon: '🥩' },
 ];
 
+// catFilter values MUST exactly match category_id values stored in Supabase products table.
+// Real DB values found in DB: 'fruits', 'vegetables', 'meat', 'dairy', 'honey', 'bread', 'nuts', 'tea'
+// AND newer values: 'fruits_vegetables', 'farm_meat', 'organic', 'no_sugar', 'no_gluten', 'no_lactose', 'superfoods', 'snacks'
+// catFilters lists ALL possible DB values for each displayed category so counters work regardless of which set was used.
 export const catalogCategories = [
-  { id: 'fruits_vegetables', name: 'Фрукты и овощи', icon: '🍎', tagFilter: '', catFilter: 'fruits_vegetables', color: '#F0FDF4', borderColor: '#BBF7D0' },
-  { id: 'farm_meat', name: 'Фермерское мясо и птица', icon: '🥩', tagFilter: 'Фермерское', catFilter: 'farm_meat', color: '#FFF0F0', borderColor: '#FECACA' },
-  { id: 'organic', name: 'Органика', icon: '🌿', tagFilter: 'Органик', catFilter: 'organic', color: '#F0FFF4', borderColor: '#BBF7D0' },
-  { id: 'no_sugar', name: 'Без сахара', icon: '🍬', tagFilter: 'Без сахара', catFilter: 'no_sugar', color: '#FFFBEB', borderColor: '#FDE68A' },
-  { id: 'no_gluten', name: 'Без глютена', icon: '🌾', tagFilter: 'Без глютена', catFilter: 'no_gluten', color: '#FFF7ED', borderColor: '#FED7AA' },
-  { id: 'no_lactose', name: 'Без лактозы', icon: '🥛', tagFilter: 'Без лактозы', catFilter: 'no_lactose', color: '#EFF6FF', borderColor: '#BFDBFE' },
-  { id: 'superfoods', name: 'Суперфуды', icon: '⚡', tagFilter: 'Суперфуд', catFilter: 'superfoods', color: '#F5F3FF', borderColor: '#DDD6FE' },
-  { id: 'snacks', name: 'Здоровые перекусы', icon: '🥗', tagFilter: 'Перекус', catFilter: 'snacks', color: '#F0FDFA', borderColor: '#99F6E4' },
+  { id: 'fruits_vegetables', name: 'Фрукты и овощи', icon: '🍎', tagFilter: '', catFilters: ['fruits', 'vegetables', 'fruits_vegetables'], color: '#F0FDF4', borderColor: '#BBF7D0' },
+  { id: 'farm_meat', name: 'Фермерское мясо и птица', icon: '🥩', tagFilter: 'Фермерское', catFilters: ['meat', 'farm_meat'], color: '#FFF0F0', borderColor: '#FECACA' },
+  { id: 'organic', name: 'Органика', icon: '🌿', tagFilter: 'Органик', catFilters: ['organic'], color: '#F0FFF4', borderColor: '#BBF7D0' },
+  { id: 'no_sugar', name: 'Без сахара', icon: '🍬', tagFilter: 'Без сахара', catFilters: ['no_sugar'], color: '#FFFBEB', borderColor: '#FDE68A' },
+  { id: 'no_gluten', name: 'Без глютена', icon: '🌾', tagFilter: 'Без глютена', catFilters: ['no_gluten'], color: '#FFF7ED', borderColor: '#FED7AA' },
+  { id: 'no_lactose', name: 'Без лактозы', icon: '🥛', tagFilter: 'Без лактозы', catFilters: ['dairy', 'no_lactose'], color: '#EFF6FF', borderColor: '#BFDBFE' },
+  { id: 'superfoods', name: 'Суперфуды', icon: '⚡', tagFilter: 'Суперфуд', catFilters: ['superfoods', 'nuts', 'honey'], color: '#F5F3FF', borderColor: '#DDD6FE' },
+  { id: 'snacks', name: 'Здоровые перекусы', icon: '🥗', tagFilter: 'Перекус', catFilters: ['snacks', 'bread', 'tea'], color: '#F0FDFA', borderColor: '#99F6E4' },
 ];
 
 export const smartFilters = [
