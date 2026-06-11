@@ -139,18 +139,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async function loadData() {
       try {
         const [prods, sels] = await Promise.all([fetchProducts(), fetchSellers()]);
+        console.log('[AppContext] Loaded products:', prods.length, 'sellers:', sels.length);
         if (mounted) {
-          if (prods.length > 0) setAllProducts(prods);
-          if (sels.length > 0) {
-            const updatedSellers = sels.map(s => ({
-              ...s,
-              productCount: prods.filter(p => p.supplierId === s.id).length
-            }));
-            setAllSellers(updatedSellers);
-          }
+          // Always update — even empty array means "no active products"
+          setAllProducts(prods);
+          const updatedSellers = sels.map(s => ({
+            ...s,
+            productCount: prods.filter(p => p.supplierId === s.id).length
+          }));
+          setAllSellers(updatedSellers);
         }
       } catch (err) {
-        console.error('Failed to load data from Supabase:', err);
+        console.error('[AppContext] Failed to load data from Supabase:', err);
       } finally {
         if (mounted) setIsLoadingData(false);
       }

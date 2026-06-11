@@ -131,7 +131,16 @@ export async function fetchProducts(): Promise<Product[]> {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching products:', error);
+    console.error('[api] fetchProducts error:', error.message, error.details, error.hint);
+    // Fallback: if is_active column missing, load all products
+    if (error.message?.includes('is_active') || error.code === '42703') {
+      console.warn('[api] is_active column not found, loading all products as fallback');
+      const { data: fallback } = await supabase
+        .from('products')
+        .select(`*, sellers (*), certificates (*), lab_tests (*)`)
+        .order('created_at', { ascending: false });
+      return (fallback || []).map(mapProduct);
+    }
     return [];
   }
 
