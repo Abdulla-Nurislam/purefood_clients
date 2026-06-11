@@ -1,31 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { User, MapPin, Settings, Star, Heart, MessageSquare, LogOut, ChevronRight, ShieldCheck, Gift, RefreshCw, Package, Leaf, Check } from 'lucide-react';
 import { preferences } from '../data/mock-data';
 
 function EcoStatusWidget() {
+  const { orders } = useApp();
   const [showEcoModal, setShowEcoModal] = useState(false);
-  const [ecoPoints, setEcoPoints] = useState(() => {
-    try {
-      const stored = localStorage.getItem('purefood_eco_points');
-      return stored ? parseInt(stored, 10) : 0;
-    } catch {
-      return 0;
-    }
-  });
 
-  useEffect(() => {
-    const bonus = Math.floor(Math.random() * 5) + 1;
-    setEcoPoints(prev => {
-      const newVal = Math.min(prev + bonus, 100);
-      try {
-        localStorage.setItem('purefood_eco_points', String(newVal));
-      } catch {
-        // ignore
-      }
-      return newVal;
-    });
-  }, []);
+  // Calculate eco-points from real orders: 5 pts per order containing eco-tagged products (max 100)
+  const ecoPoints = Math.min(
+    orders.reduce((pts, order) => {
+      const hasEcoProduct = order.items.some(item => {
+        const tags: string[] = item.product.tags || [];
+        const badges: string[] = item.product.badges || [];
+        const ecoKeywords = ['Эко', 'Органик', '100% Натурально', 'Натуральное', 'Фермерское'];
+        return [...tags, ...badges].some(t => ecoKeywords.some(kw => t.includes(kw)));
+      });
+      return hasEcoProduct ? pts + 5 : pts;
+    }, 0),
+    100
+  );
 
   const getEcoLevel = (pts: number) => {
     if (pts >= 91) return { label: 'Эко-легенда', emoji: '🏆', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', barColor: 'bg-amber-500' };

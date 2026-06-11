@@ -127,6 +127,7 @@ export async function fetchProducts(): Promise<Product[]> {
       certificates (*),
       lab_tests (*)
     `)
+    .eq('is_active', true)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -159,6 +160,7 @@ export async function fetchProductById(id: string): Promise<Product | null> {
       lab_tests (*)
     `)
     .eq('id', id)
+    .eq('is_active', true)
     .single();
 
   if (error) {

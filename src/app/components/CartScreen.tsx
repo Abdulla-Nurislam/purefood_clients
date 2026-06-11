@@ -77,20 +77,20 @@ export function CartScreen() {
 
   const finalizeOrder = async () => {
     const pm = paymentMethods.find(m => m.id === paymentMethod);
-    
+
     // 1. Send to Supabase
     const { createOrder } = await import('../../lib/api');
     const newOrders = await createOrder(
-      cart, 
-      total, 
+      cart,
+      total,
       'Алматы, Абая 100', // mock delivery address
       pm?.label || 'Онлайн оплата',
       userId || undefined
     );
 
     // 2. Local state update for immediate UI
-    const orderId = newOrders?.[0]?.id || `ST-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${String(Math.floor(Math.random() * 999)).padStart(3, '0')}`;
-    
+    const orderId = newOrders?.[0]?.id || `ST-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(Math.floor(Math.random() * 999)).padStart(3, '0')}`;
+
     addOrder({
       id: orderId,
       items: [...cart],
@@ -225,7 +225,7 @@ export function CartScreen() {
         {/* Security badge */}
         <div className="mt-4 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
           <Lock className="w-3 h-3" />
-          <span>Защищено CloudPayments · PCI DSS Level 1</span>
+          <span>Защищено</span>
         </div>
       </div>
     </div>
@@ -239,7 +239,7 @@ export function CartScreen() {
           <button onClick={() => setStep('checkout')} className="text-primary text-sm">← Назад</button>
           <h2>Оплата Kaspi Gold</h2>
         </div>
-        
+
         <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-4">
           <div className="w-16 h-16 bg-[#F14635]/10 rounded-2xl flex items-center justify-center mx-auto">
             <span className="text-3xl">🏦</span>
@@ -248,13 +248,13 @@ export function CartScreen() {
             <p className="text-sm text-muted-foreground mb-1">Сумма к оплате</p>
             <p className="text-3xl font-bold">{total.toLocaleString()} ₸</p>
           </div>
-          
+
           <div className="bg-secondary rounded-xl p-4 text-left">
             <p className="text-xs text-muted-foreground mb-1">Перевод по номеру телефона</p>
             <p className="text-lg font-medium">+7 777 000 00 00</p>
             <p className="text-sm mt-1">Получатель: Nurislam A.</p>
           </div>
-          
+
           <p className="text-sm text-muted-foreground">После совершения перевода в приложении Kaspi.kz, нажмите кнопку ниже для подтверждения.</p>
         </div>
 
@@ -306,96 +306,96 @@ export function CartScreen() {
             <h2>Оформление</h2>
           </div>
 
-        {/* Delivery */}
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-          <h4 className="flex items-center gap-2"><Truck className="w-4 h-4" /> Доставка</h4>
-          <button
-            onClick={() => setDeliveryType('standard')}
-            className={`w-full flex items-center justify-between p-3 rounded-xl border ${deliveryType === 'standard' ? 'border-primary bg-secondary' : 'border-border'}`}
-          >
-            <div>
-              <p className="text-sm">Стандартная</p>
-              <p className="text-xs text-muted-foreground">1-2 дня</p>
-            </div>
-            <span className="text-sm">500 ₸</span>
-          </button>
-          <button
-            onClick={() => setDeliveryType('express')}
-            className={`w-full flex items-center justify-between p-3 rounded-xl border ${deliveryType === 'express' ? 'border-primary bg-secondary' : 'border-border'}`}
-          >
-            <div>
-              <p className="text-sm">Экспресс</p>
-              <p className="text-xs text-muted-foreground">2-4 часа</p>
-            </div>
-            <span className="text-sm">1 500 ₸</span>
-          </button>
-        </div>
-
-        {/* Payment */}
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-          <h4 className="flex items-center gap-2"><CreditCard className="w-4 h-4" /> Способ оплаты</h4>
-          {paymentMethods.map(pm => (
+          {/* Delivery */}
+          <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+            <h4 className="flex items-center gap-2"><Truck className="w-4 h-4" /> Доставка</h4>
             <button
-              key={pm.id}
-              onClick={() => setPaymentMethod(pm.id)}
-              className={`w-full flex items-center justify-between p-3 rounded-xl border ${paymentMethod === pm.id ? 'border-primary bg-secondary' : 'border-border'}`}
+              onClick={() => setDeliveryType('standard')}
+              className={`w-full flex items-center justify-between p-3 rounded-xl border ${deliveryType === 'standard' ? 'border-primary bg-secondary' : 'border-border'}`}
             >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">{pm.icon}</span>
-                <div>
-                  <p className="text-sm">{pm.label}</p>
-                  <p className="text-xs text-muted-foreground">{pm.detail}</p>
-                </div>
+              <div>
+                <p className="text-sm">Стандартная</p>
+                <p className="text-xs text-muted-foreground">1-2 дня</p>
               </div>
-              {paymentMethod === pm.id && <CheckCircle className="w-5 h-5 text-primary" />}
+              <span className="text-sm">500 ₸</span>
             </button>
-          ))}
-        </div>
-
-        {/* Promo */}
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-2">
-          <h4 className="flex items-center gap-2"><Tag className="w-4 h-4" /> Промокод</h4>
-          <div className="flex gap-2">
-            <input
-              value={promoCode}
-              onChange={e => setPromoCode(e.target.value)}
-              placeholder="Введите промокод"
-              className="flex-1 bg-input-background border border-border rounded-xl px-3 py-2 text-sm"
-              disabled={promoApplied}
-            />
             <button
-              onClick={handleApplyPromo}
-              disabled={promoApplied || !promoCode}
-              className={`px-4 py-2 rounded-xl text-sm ${promoApplied ? 'bg-secondary text-primary' : 'bg-primary text-primary-foreground'}`}
+              onClick={() => setDeliveryType('express')}
+              className={`w-full flex items-center justify-between p-3 rounded-xl border ${deliveryType === 'express' ? 'border-primary bg-secondary' : 'border-border'}`}
             >
-              {promoApplied ? '✓' : 'Ок'}
+              <div>
+                <p className="text-sm">Экспресс</p>
+                <p className="text-xs text-muted-foreground">2-4 часа</p>
+              </div>
+              <span className="text-sm">1 500 ₸</span>
             </button>
           </div>
-          <p className="text-xs text-muted-foreground">Попробуйте SMART10</p>
-        </div>
 
-        {/* Summary */}
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Товары ({cart.reduce((s, i) => s + i.quantity, 0)})</span>
-            <span>{cartTotal.toLocaleString()} ₸</span>
+          {/* Payment */}
+          <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+            <h4 className="flex items-center gap-2"><CreditCard className="w-4 h-4" /> Способ оплаты</h4>
+            {paymentMethods.map(pm => (
+              <button
+                key={pm.id}
+                onClick={() => setPaymentMethod(pm.id)}
+                className={`w-full flex items-center justify-between p-3 rounded-xl border ${paymentMethod === pm.id ? 'border-primary bg-secondary' : 'border-border'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{pm.icon}</span>
+                  <div>
+                    <p className="text-sm">{pm.label}</p>
+                    <p className="text-xs text-muted-foreground">{pm.detail}</p>
+                  </div>
+                </div>
+                {paymentMethod === pm.id && <CheckCircle className="w-5 h-5 text-primary" />}
+              </button>
+            ))}
           </div>
-          {promoApplied && (
-            <div className="flex justify-between text-sm">
-              <span className="text-primary">Скидка 10%</span>
-              <span className="text-primary">-{discount.toLocaleString()} ₸</span>
+
+          {/* Promo */}
+          <div className="bg-card border border-border rounded-2xl p-4 space-y-2">
+            <h4 className="flex items-center gap-2"><Tag className="w-4 h-4" /> Промокод</h4>
+            <div className="flex gap-2">
+              <input
+                value={promoCode}
+                onChange={e => setPromoCode(e.target.value)}
+                placeholder="Введите промокод"
+                className="flex-1 bg-input-background border border-border rounded-xl px-3 py-2 text-sm"
+                disabled={promoApplied}
+              />
+              <button
+                onClick={handleApplyPromo}
+                disabled={promoApplied || !promoCode}
+                className={`px-4 py-2 rounded-xl text-sm ${promoApplied ? 'bg-secondary text-primary' : 'bg-primary text-primary-foreground'}`}
+              >
+                {promoApplied ? '✓' : 'Ок'}
+              </button>
             </div>
-          )}
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Доставка</span>
-            <span>{deliveryCost.toLocaleString()} ₸</span>
+            <p className="text-xs text-muted-foreground">Попробуйте SMART10</p>
           </div>
-          <div className="border-t border-border pt-2 flex justify-between">
-            <span>Итого</span>
-            <span className="text-primary">{total.toLocaleString()} ₸</span>
+
+          {/* Summary */}
+          <div className="bg-card border border-border rounded-2xl p-4 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Товары ({cart.reduce((s, i) => s + i.quantity, 0)})</span>
+              <span>{cartTotal.toLocaleString()} ₸</span>
+            </div>
+            {promoApplied && (
+              <div className="flex justify-between text-sm">
+                <span className="text-primary">Скидка 10%</span>
+                <span className="text-primary">-{discount.toLocaleString()} ₸</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Доставка</span>
+              <span>{deliveryCost.toLocaleString()} ₸</span>
+            </div>
+            <div className="border-t border-border pt-2 flex justify-between">
+              <span>Итого</span>
+              <span className="text-primary">{total.toLocaleString()} ₸</span>
+            </div>
+            <p className="text-xs text-muted-foreground">Вы заработаете +{earnedPoints} баллов лояльности</p>
           </div>
-          <p className="text-xs text-muted-foreground">Вы заработаете +{earnedPoints} баллов лояльности</p>
-        </div>
 
           <button onClick={handlePlaceOrder} className="w-full bg-primary text-primary-foreground py-4 rounded-2xl">
             Оплатить · {total.toLocaleString()} ₸
@@ -411,88 +411,88 @@ export function CartScreen() {
       <div className="px-4 pt-6 pb-4 space-y-4">
         <h2>Корзина</h2>
 
-      {/* Items */}
-      <div className="space-y-3">
-        {cart.map(item => (
-          <div key={item.product.id} className="flex gap-3 bg-card border border-border rounded-2xl p-3">
-            <div className="w-16 h-16 rounded-xl bg-muted overflow-hidden flex-shrink-0">
-              <ImageWithFallback src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm line-clamp-1">{item.product.name}</p>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                {item.product.supplierVerified && <ShieldCheck className="w-3 h-3 text-primary" />}
-                {item.product.supplier}
-              </p>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-primary">{(item.product.price * item.quantity).toLocaleString()} ₸</span>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} className="w-7 h-7 bg-secondary rounded-lg flex items-center justify-center">
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="text-sm w-5 text-center">{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="w-7 h-7 bg-secondary rounded-lg flex items-center justify-center">
-                    <Plus className="w-3 h-3" />
-                  </button>
-                  <button onClick={() => removeFromCart(item.product.id)} className="w-7 h-7 text-destructive">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+        {/* Items */}
+        <div className="space-y-3">
+          {cart.map(item => (
+            <div key={item.product.id} className="flex gap-3 bg-card border border-border rounded-2xl p-3">
+              <div className="w-16 h-16 rounded-xl bg-muted overflow-hidden flex-shrink-0">
+                <ImageWithFallback src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm line-clamp-1">{item.product.name}</p>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  {item.product.supplierVerified && <ShieldCheck className="w-3 h-3 text-primary" />}
+                  {item.product.supplier}
+                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-primary">{(item.product.price * item.quantity).toLocaleString()} ₸</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} className="w-7 h-7 bg-secondary rounded-lg flex items-center justify-center">
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="text-sm w-5 text-center">{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="w-7 h-7 bg-secondary rounded-lg flex items-center justify-center">
+                      <Plus className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => removeFromCart(item.product.id)} className="w-7 h-7 text-destructive">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Loyalty bonus notification */}
-      {cartTotal < 5000 ? (
-        <div className="relative overflow-hidden bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4">
-          <div className="absolute -right-3 -top-3 w-16 h-16 bg-amber-100 rounded-full opacity-40" />
-          <div className="relative flex items-start gap-3">
-            <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-4.5 h-4.5 text-amber-600" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-amber-900">Почти у цели!</p>
-              <p className="text-xs text-amber-700 leading-snug">
-                Добавьте еды ещё на <span className="font-bold text-amber-900">{(5000 - cartTotal).toLocaleString()} ₸</span>, чтобы получить повышенный бонус <span className="font-bold text-amber-900">10%</span>
-              </p>
-              <div className="w-full bg-amber-100 rounded-full h-1.5 mt-2">
-                <div
-                  className="bg-amber-500 rounded-full h-1.5"
-                  style={{ width: `${Math.min((cartTotal / 5000) * 100, 100)}%`, transition: 'width 0.3s ease-out' }}
-                />
+        {/* Loyalty bonus notification */}
+        {cartTotal < 5000 ? (
+          <div className="relative overflow-hidden bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4">
+            <div className="absolute -right-3 -top-3 w-16 h-16 bg-amber-100 rounded-full opacity-40" />
+            <div className="relative flex items-start gap-3">
+              <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-4.5 h-4.5 text-amber-600" />
               </div>
-              <p className="text-[10px] text-amber-500 mt-0.5">{cartTotal.toLocaleString()} / 5 000 ₸</p>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-amber-900">Почти у цели!</p>
+                <p className="text-xs text-amber-700 leading-snug">
+                  Добавьте еды ещё на <span className="font-bold text-amber-900">{(5000 - cartTotal).toLocaleString()} ₸</span>, чтобы получить повышенный бонус <span className="font-bold text-amber-900">10%</span>
+                </p>
+                <div className="w-full bg-amber-100 rounded-full h-1.5 mt-2">
+                  <div
+                    className="bg-amber-500 rounded-full h-1.5"
+                    style={{ width: `${Math.min((cartTotal / 5000) * 100, 100)}%`, transition: 'width 0.3s ease-out' }}
+                  />
+                </div>
+                <p className="text-[10px] text-amber-500 mt-0.5">{cartTotal.toLocaleString()} / 5 000 ₸</p>
+              </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="relative overflow-hidden bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-2xl p-4">
-          <div className="absolute -right-3 -top-3 w-16 h-16 bg-emerald-100 rounded-full opacity-40" />
-          <div className="relative flex items-center gap-3">
-            <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-4.5 h-4.5 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-emerald-900">Повышенный бонус активен! 🎉</p>
-              <p className="text-xs text-emerald-700">Вы получите повышенный бонус 10% с этого заказа</p>
+        ) : (
+          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-2xl p-4">
+            <div className="absolute -right-3 -top-3 w-16 h-16 bg-emerald-100 rounded-full opacity-40" />
+            <div className="relative flex items-center gap-3">
+              <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-4.5 h-4.5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-emerald-900">Повышенный бонус активен! 🎉</p>
+                <p className="text-xs text-emerald-700">Вы получите повышенный бонус 10% с этого заказа</p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Quick summary */}
-      <div className="bg-card border border-border rounded-2xl p-4 space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Товары ({cart.reduce((s, i) => s + i.quantity, 0)})</span>
-          <span>{cartTotal.toLocaleString()} ₸</span>
+        {/* Quick summary */}
+        <div className="bg-card border border-border rounded-2xl p-4 space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Товары ({cart.reduce((s, i) => s + i.quantity, 0)})</span>
+            <span>{cartTotal.toLocaleString()} ₸</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Доставка</span>
+            <span>от 500 ₸</span>
+          </div>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Доставка</span>
-          <span>от 500 ₸</span>
-        </div>
-      </div>
 
         <button onClick={() => setStep('checkout')} className="w-full bg-primary text-primary-foreground py-4 rounded-2xl">
           К оформлению · {cartTotal.toLocaleString()} ₸

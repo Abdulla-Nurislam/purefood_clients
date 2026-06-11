@@ -7,7 +7,7 @@ import { useToast } from './SimpleToast';
 const cities = ['Алматы', 'Астана', 'Шымкент', 'Караганда', 'Актобе', 'Тараз', 'Павлодар', 'Усть-Каменогорск'];
 
 export function SettingsScreen() {
-  const { goBack, city, setCity, excludedAllergens, setExcludedAllergens } = useApp();
+  const { goBack, city, setCity, excludedAllergens, setExcludedAllergens, deleteAccount } = useApp();
   const toast = useToast();
   const [notifOrders, setNotifOrders] = useState(true);
   const [notifPromos, setNotifPromos] = useState(true);
@@ -115,10 +115,19 @@ export function SettingsScreen() {
           <p className="text-sm text-red-700">Вы уверены? Все данные будут удалены безвозвратно.</p>
           <div className="flex gap-2">
             <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-2 rounded-xl border border-border text-sm">Отмена</button>
-            <button onClick={() => { setShowDeleteConfirm(false); toast.info('Функция недоступна в демо-версии'); }} className="flex-1 py-2 rounded-xl bg-destructive text-destructive-foreground text-sm">Удалить</button>
+            <button
+              onClick={async () => {
+                setShowDeleteConfirm(false);
+                await deleteAccount();
+              }}
+              className="flex-1 py-2 rounded-xl bg-destructive text-destructive-foreground text-sm"
+            >
+              Удалить
+            </button>
           </div>
         </div>
       )}
+
     </div>
   );
 }

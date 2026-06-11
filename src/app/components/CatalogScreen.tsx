@@ -168,7 +168,11 @@ export function CatalogScreen() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm leading-tight">{cat.name}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {allProducts.filter(p => cat.tagFilter ? p.tags.includes(cat.tagFilter) : cat.catFilter ? p.category === cat.catFilter : true).length} товаров
+                      {allProducts.filter(p => {
+                        if (cat.tagFilter) return p.tags.includes(cat.tagFilter);
+                        if (cat.catFilter) return p.category === cat.catFilter;
+                        return false;
+                      }).length} товаров
                     </p>
                   </div>
                 </button>

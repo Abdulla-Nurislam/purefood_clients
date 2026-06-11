@@ -77,6 +77,9 @@ interface AppState {
   routeParams: Record<string, string>;
   navigate: (path: string) => void;
   goBack: () => void;
+
+  // Account deletion
+  deleteAccount: () => Promise<void>;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -274,6 +277,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Loyalty
   const addLoyaltyPoints = (pts: number) => setLoyaltyPoints(prev => prev + pts);
 
+  // Account deletion — full session cleanup
+  const deleteAccount = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn('signOut error (ignored):', err);
+    }
+    // Clear all purefood_ keys from localStorage
+    try {
+      const keysToRemove = Object.keys(localStorage).filter(k => k.startsWith('purefood_'));
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    } catch {
+      // ignore
+    }
+    // Reset all auth and user state
+    setIsLoggedIn(false);
+    setUserId(null);
+    setUserName('');
+    setEmail('');
+    setAvatarUrl('');
+    setPhone('');
+    setCity('Алматы');
+    setSelectedPreferences([]);
+    setExcludedAllergens([]);
+    setCart([]);
+    setOrders([]);
+    setFavorites([]);
+    setReviews([]);
+    setSubscriptions([]);
+    setNotifications([]);
+    setLoyaltyPoints(0);
+    setRouteHistory(['/home']);
+    // Reset onboarding so the next open prompts fresh registration
+    setOnboardedState(false);
+  };
+
   return (
     <AppContext.Provider value={{
       showSplash, setShowSplash,
@@ -296,6 +335,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       loyaltyPoints, addLoyaltyPoints,
       allProducts, allSellers, isLoadingData,
       currentRoute, routeParams, navigate, goBack,
+      deleteAccount,
     }}>
       {children}
     </AppContext.Provider>
