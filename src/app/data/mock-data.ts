@@ -111,12 +111,12 @@ export const categories = [
 ];
 
 export const catalogCategories = [
-  { id: 'fruits', name: 'Фрукты и овощи', icon: '🍎', tagFilter: '', catFilter: 'fruits', color: '#F0FDF4', borderColor: '#BBF7D0' },
-  { id: 'farm_meat', name: 'Фермерское мясо и птица', icon: '🥩', tagFilter: 'Фермерское', catFilter: 'meat', color: '#FFF0F0', borderColor: '#FECACA' },
-  { id: 'organic', name: 'Органика', icon: '🌿', tagFilter: 'Органик', catFilter: '', color: '#F0FFF4', borderColor: '#BBF7D0' },
-  { id: 'no_sugar', name: 'Без сахара', icon: '🍬', tagFilter: 'Без сахара', catFilter: '', color: '#FFFBEB', borderColor: '#FDE68A' },
-  { id: 'no_gluten', name: 'Без глютена', icon: '🌾', tagFilter: 'Без глютена', catFilter: '', color: '#FFF7ED', borderColor: '#FED7AA' },
-  { id: 'no_lactose', name: 'Без лактозы', icon: '🥛', tagFilter: 'Без лактозы', catFilter: '', color: '#EFF6FF', borderColor: '#BFDBFE' },
+  { id: 'fruits_vegetables', name: 'Фрукты и овощи', icon: '🍎', tagFilter: '', catFilter: 'fruits_vegetables', color: '#F0FDF4', borderColor: '#BBF7D0' },
+  { id: 'farm_meat', name: 'Фермерское мясо и птица', icon: '🥩', tagFilter: 'Фермерское', catFilter: 'farm_meat', color: '#FFF0F0', borderColor: '#FECACA' },
+  { id: 'organic', name: 'Органика', icon: '🌿', tagFilter: 'Органик', catFilter: 'organic', color: '#F0FFF4', borderColor: '#BBF7D0' },
+  { id: 'no_sugar', name: 'Без сахара', icon: '🍬', tagFilter: 'Без сахара', catFilter: 'no_sugar', color: '#FFFBEB', borderColor: '#FDE68A' },
+  { id: 'no_gluten', name: 'Без глютена', icon: '🌾', tagFilter: 'Без глютена', catFilter: 'no_gluten', color: '#FFF7ED', borderColor: '#FED7AA' },
+  { id: 'no_lactose', name: 'Без лактозы', icon: '🥛', tagFilter: 'Без лактозы', catFilter: 'no_lactose', color: '#EFF6FF', borderColor: '#BFDBFE' },
   { id: 'superfoods', name: 'Суперфуды', icon: '⚡', tagFilter: 'Суперфуд', catFilter: 'superfoods', color: '#F5F3FF', borderColor: '#DDD6FE' },
   { id: 'snacks', name: 'Здоровые перекусы', icon: '🥗', tagFilter: 'Перекус', catFilter: 'snacks', color: '#F0FDFA', borderColor: '#99F6E4' },
 ];

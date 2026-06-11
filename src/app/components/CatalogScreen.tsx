@@ -48,8 +48,9 @@ export function CatalogScreen() {
   const filteredProducts = allProducts.filter(p => {
     if (query && !p.name.toLowerCase().includes(query.toLowerCase()) && !p.supplier.toLowerCase().includes(query.toLowerCase())) return false;
     if (activeCatData) {
-      const tagMatch = activeCatData.tagFilter ? p.tags.includes(activeCatData.tagFilter) : true;
-      const catMatch = activeCatData.catFilter ? p.category === activeCatData.catFilter : true;
+      const tagMatch = activeCatData.tagFilter ? p.tags.includes(activeCatData.tagFilter) : false;
+      const catMatch = activeCatData.catFilter ? p.category === activeCatData.catFilter : false;
+      // Product must match EITHER the tag filter OR the category filter (or both)
       if (!tagMatch && !catMatch) return false;
     }
     if (activeSmartFilters.length > 0 && !activeSmartFilters.some(t => p.tags.includes(t))) return false;
@@ -169,9 +170,9 @@ export function CatalogScreen() {
                     <p className="text-sm leading-tight">{cat.name}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {allProducts.filter(p => {
-                        if (cat.tagFilter) return p.tags.includes(cat.tagFilter);
-                        if (cat.catFilter) return p.category === cat.catFilter;
-                        return false;
+                        const tagMatch = cat.tagFilter ? p.tags.includes(cat.tagFilter) : false;
+                        const catMatch = cat.catFilter ? p.category === cat.catFilter : false;
+                        return tagMatch || catMatch;
                       }).length} товаров
                     </p>
                   </div>
