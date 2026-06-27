@@ -461,3 +461,161 @@ export async function registerClient(user: {
 
   return userData;
 }
+
+// ============================================================
+// Reviews API
+// ============================================================
+
+export interface ReviewItem {
+  id: string;
+  user_id: string | null;
+  seller_id: string;
+  order_id: string | null;
+  product_id: string;
+  rating: number;
+  text_comment: string | null;
+  tags: string[];
+  images: string[];
+  seller_reply: string | null;
+  seller_reply_at: string | null;
+  is_flagged: boolean;
+  created_at: string;
+  // joined user name (optional)
+  userName?: string;
+}
+
+export interface ProductReviewsResult {
+  reviews: ReviewItem[];
+  averageRating: number;
+  reviewCount: number;
+  ratingDistribution: Record<number, number>; // e.g. {5: 12, 4: 5, ...}
+}
+
+export async function fetchProductReviews(productId: string): Promise<ProductReviewsResult> {
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*, users(name, phone)')
+    .eq('product_id', productId)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.error('[api] fetchProductReviews error:', error.message);
+    return { reviews: [], averageRating: 0, reviewCount: 0, ratingDistribution: {} };
+  }
+
+  const rows = (data || []) as any[];
+  const reviews: ReviewItem[] = rows.map(r => ({
+    id: r.id,
+    user_id: r.user_id,
+    seller_id: r.seller_id,
+    order_id: r.order_id,
+    product_id: r.product_id,
+    rating: r.rating,
+    text_comment: r.text_comment,
+    tags: r.tags || [],
+    images: r.images || [],
+    seller_reply: r.seller_reply,
+    seller_reply_at: r.seller_reply_at,
+    is_flagged: r.is_flagged,
+    created_at: r.created_at,
+    userName: r.users?.name || r.users?.phone || 'Покупатель',
+  }));
+
+  const averageRating = reviews.length > 0
+    ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10
+    : 0;
+
+  const ratingDistribution = reviews.reduce((acc, r) => {
+    acc[r.rating] = (acc[r.rating] || 0) + 1;
+    return acc;
+  }, {} as Record<number, number>);
+
+  return { reviews, averageRating, reviewCount: reviews.length, ratingDistribution };
+}
+
+export async function submitReview(params: {
+  userId: string;
+  sellerId: string;
+  orderId: string;
+  productId: string;
+  rating: number;
+  textComment?: string;
+  tags?: string[];
+  images?: string[];
+}): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase.from('reviews').insert({
+    user_id:      params.userId,
+    seller_id:    params.sellerId,
+    order_id:     params.orderId,
+    product_id:   params.productId,
+    rating:       params.rating,
+    text_comment: params.textComment || null,
+    tags:         params.tags || [],
+    images:       params.images || [],
+  });
+
+  if (error) {
+    console.error('[api] submitReview error:', error.message);
+    return { success: false, error: error.message };
+  }
+
+  // Mark order as reviewed
+  await supabase.from('orders').update({ reviewed: true }).eq('id', params.orderId);
+
+  return { success: true };
+}
+
+export async function uploadReviewImage(
+  file: File,
+  userId: string
+): Promise<string | null> {
+  const ext = file.name.split('.').pop() || 'jpg';
+  const path = `${userId}/${Date.now()}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from('review-images')
+    .upload(path, file, { cacheControl: '3600', upsert: false });
+
+  if (error) {
+    console.error('[api] uploadReviewImage error:', error.message);
+    return null;
+  }
+
+  const { data } = supabase.storage.from('review-images').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+// Compress image on client side using Canvas API (max 800px, quality 0.8)
+export function compressImage(file: File, maxPx = 800, quality = 0.8): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxPx || height > maxPx) {
+        if (width > height) {
+          height = Math.round((height * maxPx) / width);
+          width = maxPx;
+        } else {
+          width = Math.round((width * maxPx) / height);
+          height = maxPx;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          URL.revokeObjectURL(url);
+          if (blob) resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          else resolve(file);
+        },
+        'image/jpeg',
+        quality
+      );
+    };
+    img.src = url;
+  });
+}

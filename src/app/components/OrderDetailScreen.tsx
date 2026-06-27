@@ -28,11 +28,7 @@ export function OrderDetailScreen() {
     toast.success('Заказ отменён');
   };
 
-  const handleRate = () => {
-    rateOrder(order.id, rating);
-    setShowRating(false);
-    toast.success('Спасибо за оценку!');
-  };
+
 
   return (
     <div className="px-4 pt-6 pb-6 space-y-4">
@@ -126,26 +122,13 @@ export function OrderDetailScreen() {
       </div>
 
       {/* Rating section */}
-      {canRate && !showRating && (
-        <button onClick={() => setShowRating(true)} className="w-full bg-primary text-primary-foreground py-3 rounded-2xl flex items-center justify-center gap-2">
+      {canRate && (
+        <button
+          onClick={() => navigate(`/write-review/${order.id}`)}
+          className="w-full bg-primary text-primary-foreground py-3.5 rounded-2xl flex items-center justify-center gap-2 font-semibold active:scale-[0.98] transition-transform"
+        >
           <Star className="w-5 h-5" /> Оценить заказ
         </button>
-      )}
-
-      {showRating && (
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-3 animate-[fadeIn_0.3s_ease-out]">
-          <h4>Как вам заказ?</h4>
-          <div className="flex gap-2 justify-center">
-            {[1, 2, 3, 4, 5].map(s => (
-              <button key={s} onClick={() => setRating(s)}>
-                <Star className={`w-8 h-8 ${s <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted'}`} />
-              </button>
-            ))}
-          </div>
-          <button onClick={handleRate} className="w-full bg-primary text-primary-foreground py-3 rounded-xl">
-            Отправить оценку
-          </button>
-        </div>
       )}
 
       {/* Cancel order */}

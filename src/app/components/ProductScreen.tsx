@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { ArrowLeft, ShieldCheck, Star, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, XCircle, Share2, Heart, Plus, Minus, Lock, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Star, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, XCircle, Share2, Heart, Plus, Minus, Lock, RefreshCw, MessageSquare } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useToast } from './SimpleToast';
-import { recordProductView } from '../../lib/api';
+import { recordProductView, fetchProductReviews, type ProductReviewsResult } from '../../lib/api';
 
 export function ProductScreen() {
   const { addToCart, cart, updateQuantity, routeParams, goBack, navigate, isFavorite, toggleFavorite, subscriptions, addSubscription, allProducts } = useApp();
@@ -42,6 +42,18 @@ export function ProductScreen() {
   const [showCerts, setShowCerts] = useState(false);
   const [showLabs, setShowLabs] = useState(false);
   const [showSubscribe, setShowSubscribe] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
+  const [reviewsData, setReviewsData] = useState<ProductReviewsResult | null>(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+
+  const handleLoadReviews = async () => {
+    if (reviewsData) { setShowReviews(v => !v); return; }
+    setShowReviews(true);
+    setReviewsLoading(true);
+    const data = await fetchProductReviews(product!.id);
+    setReviewsData(data);
+    setReviewsLoading(false);
+  };
 
   if (!product) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center gap-3">
@@ -310,7 +322,108 @@ export function ProductScreen() {
         </div>
       </div>
 
+        {/* Reviews block */}
+        <div className="mx-4 bg-card border border-border rounded-2xl overflow-hidden">
+          <button
+            onClick={handleLoadReviews}
+            className="w-full flex items-center justify-between p-4"
+          >
+            <span className="flex items-center gap-2 text-sm font-medium">
+              <MessageSquare className="w-4 h-4 text-primary" />
+              Отзывы{product.reviewCount > 0 ? ` (${product.reviewCount})` : ''}
+            </span>
+            <div className="flex items-center gap-2">
+              {product.reviewCount > 0 && (
+                <span className="flex items-center gap-1 text-xs text-amber-600">
+                  <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                  {product.rating.toFixed(1)}
+                </span>
+              )}
+              {showReviews ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </div>
+          </button>
+
+          {showReviews && (
+            <div className="border-t border-border px-4 pb-4 pt-3 space-y-3">
+              {reviewsLoading ? (
+                <div className="space-y-2 animate-pulse">
+                  {[0,1,2].map(i => <div key={i} className="bg-muted rounded-xl h-16" />)}
+                </div>
+              ) : !reviewsData || reviewsData.reviewCount === 0 ? (
+                <div className="flex flex-col items-center py-4 text-center gap-2">
+                  <MessageSquare className="w-8 h-8 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Отзывов пока нет</p>
+                  <p className="text-xs text-muted-foreground">Будьте первым, кто оставит отзыв!</p>
+                </div>
+              ) : (
+                <>
+                  {/* Rating distribution */}
+                  <div className="space-y-1.5">
+                    {[5, 4, 3, 2, 1].map(star => {
+                      const cnt = reviewsData.ratingDistribution[star] || 0;
+                      const pct = reviewsData.reviewCount > 0 ? (cnt / reviewsData.reviewCount) * 100 : 0;
+                      return (
+                        <div key={star} className="flex items-center gap-2 text-xs">
+                          <span className="w-3 text-right text-muted-foreground">{star}</span>
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 flex-shrink-0" />
+                          <div className="flex-1 bg-muted rounded-full h-1.5">
+                            <div className="bg-yellow-400 rounded-full h-1.5 transition-all" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="w-5 text-muted-foreground">{cnt}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Latest reviews */}
+                  <div className="space-y-3">
+                    {reviewsData.reviews.slice(0, 3).map(review => (
+                      <div key={review.id} className="bg-secondary/50 rounded-xl p-3 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium">{review.userName}</span>
+                          <div className="flex gap-0.5">
+                            {[1,2,3,4,5].map(s => (
+                              <Star key={s} className={`w-3 h-3 ${s <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`} />
+                            ))}
+                          </div>
+                        </div>
+                        {review.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {review.tags.map(tag => (
+                              <span key={tag} className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary rounded-full">{tag}</span>
+                            ))}
+                          </div>
+                        )}
+                        {review.text_comment && (
+                          <p className="text-xs text-muted-foreground">{review.text_comment}</p>
+                        )}
+                        {review.images.length > 0 && (
+                          <div className="flex gap-1.5">
+                            {review.images.slice(0, 3).map((img, idx) => (
+                              <img key={idx} src={img} alt="review" className="w-12 h-12 rounded-lg object-cover border border-border" />
+                            ))}
+                          </div>
+                        )}
+                        {review.seller_reply && (
+                          <div className="bg-primary/5 border border-primary/20 rounded-lg p-2">
+                            <p className="text-[10px] font-medium text-primary mb-0.5">Ответ продавца:</p>
+                            <p className="text-xs text-primary/80">{review.seller_reply}</p>
+                          </div>
+                        )}
+                        <p className="text-[10px] text-muted-foreground">
+                          {new Date(review.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
       {/* Fixed bottom bar */}
+
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-card border-t border-border p-4 flex items-center gap-3 z-50">
         {cartItem ? (
           <div className="flex items-center gap-3 flex-1">

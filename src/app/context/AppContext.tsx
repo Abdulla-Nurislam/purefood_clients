@@ -222,6 +222,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   } else if (currentFullRoute.startsWith('/seller/')) {
     currentRoute = '/seller-detail';
     routeParams = { id: currentFullRoute.replace('/seller/', '') };
+  } else if (currentFullRoute.startsWith('/write-review/')) {
+    currentRoute = '/write-review';
+    routeParams = { orderId: currentFullRoute.replace('/write-review/', '') };
   }
 
   const navigate = useCallback((path: string) => {

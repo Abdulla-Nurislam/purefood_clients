@@ -16,6 +16,7 @@ import { MyReviewsScreen } from './MyReviewsScreen';
 import { SubscriptionsScreen } from './SubscriptionsScreen';
 import { LoyaltyScreen } from './LoyaltyScreen';
 import { SellerProfileScreen } from './SellerProfileScreen';
+import { WriteReviewScreen } from './WriteReviewScreen';
 
 const tabs = [
   { path: '/home', icon: Home, label: 'Главная' },
@@ -28,7 +29,7 @@ const tabs = [
 const hiddenNavRoutes = [
   '/product', '/order-detail', '/notifications', '/settings',
   '/favorites', '/my-reviews', '/subscriptions', '/loyalty',
-  '/search', '/seller-detail', '/orders',
+  '/search', '/seller-detail', '/orders', '/write-review',
 ];
 
 function CurrentScreen() {
@@ -50,6 +51,7 @@ function CurrentScreen() {
     case '/subscriptions': return <SubscriptionsScreen />;
     case '/loyalty': return <LoyaltyScreen />;
     case '/seller-detail': return <SellerProfileScreen />;
+    case '/write-review': return <WriteReviewScreen />;
     default: return <HomeScreen />;
   }
 }
